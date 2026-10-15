@@ -12,9 +12,8 @@ def git(*args):
 
 def allowed(path):
     root_files = {'.gitignore', '.gitattributes', 'AGENTS.md', 'README.md',
-                  'PPTMaker.ps1', 'Export-PPT.ps1', 'THIRD_PARTY_NOTICES.md'}
-    engine_files = {'AGENTS.md', 'README.md', 'package.json', 'package-lock.json',
-                    'slides.md', 'vite.config.ts'}
+                  'PPTMaker.ps1', 'THIRD_PARTY_NOTICES.md'}
+    engine_files = {'AGENTS.md', 'README.md', 'package.json', 'package-lock.json'}
     if path in root_files or path == 'references/inbox/README.md':
         return True
     if path.startswith('docs/'):

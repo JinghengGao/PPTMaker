@@ -15,7 +15,7 @@ $themeValue = 'default'
 # package.json pins the same exact versions, and has no empty property names.
 $enginePackage = Get-Content -LiteralPath (Join-Path $script:EngineDirectory 'package.json') -Raw -Encoding UTF8 | ConvertFrom-Json
 $themeVersion = $enginePackage.dependencies.'@slidev/theme-default'
-$config = [ordered]@{ theme = 'default'; themeVersion = $themeVersion; pptxPerSlide = $true }
+$config = [ordered]@{ theme = 'default'; themeVersion = $themeVersion }
 if ($Theme -ne 'default') {
   $themeDirectory = Join-Path $script:EngineDirectory "templates/$Theme"
   Assert-WithinDirectory $themeDirectory $script:EngineDirectory
@@ -26,7 +26,7 @@ if ($Theme -ne 'default') {
   if ($manifest.id -ne $Theme -or -not $manifest.version) { throw 'Invalid local theme manifest.' }
   $themeValue = "../../templates/$Theme"
   $themeVersion = $manifest.version
-  $config = [ordered]@{ themeId = $Theme; themeVersion = $manifest.version; pptxPerSlide = $true }
+  $config = [ordered]@{ themeId = $Theme; themeVersion = $manifest.version }
 }
 # CreateNew on the marker prevents two creators from overwriting each other.
 New-Item -ItemType Directory -Path (Split-Path -Parent $deck) -Force | Out-Null
@@ -34,7 +34,7 @@ $marker = "$deck.creating"
 $creationLock = [IO.File]::Open($marker, [IO.FileMode]::CreateNew, [IO.FileAccess]::Write, [IO.FileShare]::None)
 try {
   if ((Test-Path -LiteralPath $deck) -or (Test-Path -LiteralPath $assets)) { throw 'Deck or assets appeared during creation.' }
-  foreach ($path in @($deck,$assets,(Join-Path $deck 'screenshots'),(Join-Path $deck 'exports'))) { New-Item -ItemType Directory -Path $path | Out-Null }
+  foreach ($path in @($deck,$assets,(Join-Path $deck 'exports'))) { New-Item -ItemType Directory -Path $path | Out-Null }
   $source = Get-Content -LiteralPath (Join-Path $script:EngineDirectory 'decks/demo/slides.md') -Raw -Encoding UTF8
   $source = $source.Replace('theme: default', "theme: $themeValue").Replace('/decks/demo/', "/decks/$DeckId/")
   $utf8 = New-Object Text.UTF8Encoding($false)

@@ -1,4 +1,4 @@
-"""Check three versioned deliverables using Python's standard library."""
+"""Check the versioned PDF and editable PPTX using Python's standard library."""
 import argparse
 import datetime
 import hashlib
@@ -46,9 +46,9 @@ def main():
     deck = args.deck.resolve()
     folder = args.directory or deck / f'exports/v{args.version}'
     stem = f'{deck.name}-v{args.version}'
-    names = [f'{stem}.pdf', f'{stem}.pptx', f'{stem}-editable.pptx']
+    names = [f'{stem}.pdf', f'{stem}-editable.pptx']
     if sorted(p.name for p in folder.iterdir()) != sorted(names):
-        raise ValueError('Version directory must contain exactly PDF, PPTX and editable PPTX')
+        raise ValueError('Version directory must contain exactly PDF and editable PPTX')
     records = []
     for name in names:
         path = folder / name
@@ -63,8 +63,6 @@ def main():
         else:
             record.update(inspect_pptx(path))
         records.append(record)
-    if records[1]['slides'] != records[2]['slides']:
-        raise ValueError('Ordinary and editable PPTX slide counts differ')
     report = {'deck': deck.name, 'version': args.version,
               'checked_at': datetime.datetime.now(datetime.timezone.utc).astimezone().isoformat(),
               'output_directory': f'exports/v{args.version}', 'slides': records[1]['slides'],
@@ -73,7 +71,7 @@ def main():
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding='utf-8')
     print(json.dumps({'version': args.version, 'slides': report['slides'], 'files': len(records),
-                      'native_text_objects': records[2]['native_text_objects']}, ensure_ascii=False))
+                      'native_text_objects': records[1]['native_text_objects']}, ensure_ascii=False))
 
 
 if __name__ == '__main__':

@@ -1,16 +1,22 @@
-# 维护与发布准备
+# 维护说明
 
-## 架构
+## 实现边界
 
-根 PPTMaker.ps1 只分发操作。Workspace.ps1 共用 ID、路径和配置读取；New-Deck 创建独立目录；config/vite.ts 相对自身定位资源，避免每个新 deck 重复配置。旧私人 deck 继续使用原配置。
+PPTMaker.ps1 分发 Doctor/New/Preview/Export/Check。Workspace.ps1 提供 ID、路径和安全清理；New-Deck 创建独立目录；config/vite.ts 为 deck 提供共享资源配置。
 
-Export-Deck 是唯一导出实现：预检、独占锁、输入快照、暂存三种文件、结构检查、归档旧版、发布。准备失败时旧成品不动，日志留在本次运行目录。快照记录源稿、资源、锁文件、本地主题及共享配置；不自动提供历史恢复命令。
+所有命令直接运行 decks/<id>/slides.md，不保留引擎根 slides.md 或根 Vite 转发。依赖版本固定在 package.json 与锁文件中，不盲目升级。
 
-export.config.json 最小配置是 `theme: default` 与 `pptxPerSlide: true`。本地主题使用 themeId 和 themeVersion。editablePostprocessor 指向 deck 内的 Python 修复脚本，接收 PPTX 路径和 --report 参数。额外输入通过 snapshotIncludes 列出 deck 内路径；Python 依赖与运行条件由该 deck 记录，不默认打包第三方库。
+## 每版两份成品
 
-Check 分别记录结构检查、PDF 渲染、PPTX 原生渲染和可选浏览器检查，跳过不等于通过。普通导出不要求 PowerPoint，但某些私人 hook 可能依赖它，须由该 deck 说明。人工视觉审核独立记录。
+Export-Deck 只生成 PDF 与可编辑 PPTX，放在 exports/v<版本>/。同版本可直接重导，其他版本不动。
 
-## 回归
+导出时先获得 deck 锁，在 .export-work 准备并检查新成品。替换过程中原输出暂存于 previous；发布校验失败则恢复，成功后删除临时内容。不保存运行日志、输入快照、截图和重导历史。异常中断留下的 previous 必须先检查恢复，不能直接删除。
+
+export.config.json 默认只声明 theme 与 themeVersion。本地主题使用 themeId。editablePostprocessor 可指向 deck 内的 Python 脚本，接收目标 PPTX 与 --report 参数；修复报告及副本只存在于临时工作目录。该脚本所需的原始输入与依赖应保存在当前 deck，不放到历史目录。
+
+Check 在系统临时目录完成结构检查、PDF 渲染及可选 PPTX/浏览器检查，最后自动删除临时文件。缺少 PowerPoint 或未请求浏览器检查时明确说明，不冒称通过。人工审阅直接打开成品。
+
+## 检查与发布
 
 ```powershell
 Push-Location research-ppt
@@ -19,16 +25,10 @@ Pop-Location
 python research-ppt/scripts/check-public-repo.py
 ```
 
-Test-Workflow 在 _local/tests 的隔离副本验证创建保护、路径、缺失依赖、锁、版本冲突及失败重导保护，不改私人作品。完整验收需按根 README 实际预览、逐页截图和三格式导出。
+文件保护测试使用临时副本，结束后清理。共享代码变更后应验证示例的实际预览和两格式导出；排版变更还要逐页查看临时截图，验收后删除。
 
-修改公共代码后，在仅含 Git 跟踪文件的干净副本运行 npm.cmd ci 和完整流程，不复制 node_modules、Skills 或私人模板。新增依赖需审查锁文件，不执行破坏性升级。
+公开检查器读取 Git 索引。私人内容默认忽略，禁止强制暂存；公开新示例时同步调整忽略规则与检查器白名单。当前不添加项目许可证、不建立远程仓库或推送。
 
-## Git 与发布
+## 清理旧工作区
 
-根目录只维护一个 Git 仓库。用户新 deck 默认忽略，需单独备份。公开新示例前确认素材权限、清理个人信息，并同步修改 .gitignore 与 check-public-repo.py 白名单。
-
-检查器读取 Git 索引，提交前重新暂存改动再检查，人工审阅 git diff --cached。不要对私人目录使用 git add -f。当前暂不添加本项目许可证，不创建远程仓库或推送；正式开源发布前需明确授权。
-
-## 清理恢复
-
-_local/cleanup-backups/<时间> 保存原文件清单与 SHA256、files 备份、清理动作和恢复说明。按原相对路径选择恢复，核对哈希，不覆盖后续新工作。私人 deck、模板、参考原件和历史交付物保持原路径。
+根入口 Clean 默认只列出生成物清单，Apply 才删除。删除前检查范围、链接和活动导出进程；逐个删除文件，仅删除已空的目录。保留所有版本的 PDF/可编辑 PPTX、源稿、素材、当前 hook 及其同目录依赖、第三方运行库和私人笔记。

@@ -5,11 +5,14 @@ No real browser export is performed here; the end-to-end check is documented sep
 param()
 $ErrorActionPreference='Stop'
 $root=Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-$testRoot=Join-Path $root ('_local/tests/'+(Get-Date -Format 'yyyyMMdd-HHmmss-fff'))
+$tempParent=[IO.Path]::GetTempPath()
+$testRoot=Join-Path $tempParent ('pptmaker-test-'+[Guid]::NewGuid().ToString('N'))
+. (Join-Path $PSScriptRoot 'Workspace.ps1')
+try {
 $engine=Join-Path $testRoot 'research-ppt'
 New-Item -ItemType Directory -Path $engine -Force | Out-Null
 foreach ($name in @('scripts','config')) { Copy-Item -LiteralPath (Join-Path $root "research-ppt/$name") -Destination $engine -Recurse }
-foreach ($name in @('decks/demo','decks/_template','public/decks/demo')) {
+foreach ($name in @('decks/demo','decks/_template','public/decks/demo','templates/_template')) {
   $destination=Join-Path $engine $name
   New-Item -ItemType Directory -Path (Split-Path -Parent $destination) -Force | Out-Null
   New-Item -ItemType Directory -Path $destination -Force | Out-Null
@@ -17,7 +20,7 @@ foreach ($name in @('decks/demo','decks/_template','public/decks/demo')) {
     Copy-Item -LiteralPath $file.FullName -Destination $destination
   }
 }
-foreach ($name in @('PPTMaker.ps1','Export-PPT.ps1')) { Copy-Item -LiteralPath (Join-Path $root $name) -Destination $testRoot }
+foreach ($name in @('PPTMaker.ps1')) { Copy-Item -LiteralPath (Join-Path $root $name) -Destination $testRoot }
 foreach ($name in @('package.json','package-lock.json')) { Copy-Item -LiteralPath (Join-Path $root "research-ppt/$name") -Destination $engine }
 $results=New-Object Collections.Generic.List[object]
 function Assert-True([bool]$Condition,[string]$Message) { if (-not $Condition) { throw $Message } }
@@ -48,7 +51,10 @@ New-Item -ItemType Directory -Path $output -Force | Out-Null
 $sentinel=Join-Path $output 'original.txt'
 Set-Content -LiteralPath $sentinel -Value 'preserve this output'
 $sentinelHash=(Get-FileHash -LiteralPath $sentinel).Hash
-Expect-Failure 'existing version refused' { & $cli -Action Export -DeckId test-talk -Version 1.0.0 } 'already exists'
+$otherVersion=Join-Path $engine 'decks/test-talk/exports/v0.9.0'
+New-Item -ItemType Directory -Path $otherVersion -Force | Out-Null
+Set-Content -LiteralPath (Join-Path $otherVersion 'keep.txt') -Value 'other version'
+
 $packageFolder=Join-Path $engine 'node_modules/@slidev/cli'
 New-Item -ItemType Directory -Path $packageFolder -Force | Out-Null
 Set-Content -LiteralPath (Join-Path $packageFolder 'package.json') -Value '{}'
@@ -64,7 +70,7 @@ Set-Content -LiteralPath (Join-Path $mock 'npx.cmd') -Value "@exit /b 37" -Encod
 $savedPath=$env:PATH
 try {
   $env:PATH="$mock;$savedPath"
-  Expect-Failure 'failed rebuild preserves previous output' { & $cli -Action Export -DeckId test-talk -Version 1.0.0 -Rebuild } 'PDF export failed'
+  Expect-Failure 'failed rebuild preserves previous output' { & $cli -Action Export -DeckId test-talk -Version 1.0.0 } 'PDF export failed'
 } finally { $env:PATH=$savedPath }
 Assert-True ((Get-FileHash -LiteralPath $sentinel).Hash -eq $sentinelHash) 'Failed rebuild modified existing output'
 Assert-True (-not (Test-Path -LiteralPath $lock)) 'Failed export left its lock'
@@ -87,9 +93,16 @@ pathlib.Path(args[args.index('--output')+1]).write_text('{}',encoding='utf-8')
 '@ -Encoding ASCII
 try {
   $env:PATH="$mock;$savedPath"
-  Expect-Failure 'publication failure rolls back old output' { & $cli -Action Export -DeckId test-talk -Version 1.0.0 -Rebuild } 'Published export integrity check failed'
+  Expect-Failure 'publication failure rolls back old output' { & $cli -Action Export -DeckId test-talk -Version 1.0.0 } 'Published export integrity check failed'
 } finally { $env:PATH=$savedPath }
 Assert-True ((Get-FileHash -LiteralPath $sentinel).Hash -eq $sentinelHash) 'Publication rollback lost original output'
 Assert-True (-not (Test-Path -LiteralPath $lock)) 'Rollback left a lock'
 $results | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath (Join-Path $testRoot 'results.json') -Encoding UTF8
-Write-Output "Passed $($results.Count) workflow checks. Evidence: $testRoot"
+Assert-True (Test-Path -LiteralPath (Join-Path $otherVersion 'keep.txt')) 'Another version was removed'
+$results.Add(@{test='other versions preserved';status='passed'})
+Assert-True (-not (Test-Path -LiteralPath (Join-Path $deck '.export-work'))) 'Temporary export data was retained'
+& $cli -Action Clean | Out-Null
+Assert-True ((Get-FileHash -LiteralPath $sentinel).Hash -eq $sentinelHash) 'Read-only cleanup preview deleted output'
+$results.Add(@{test='cleanup defaults to read-only preview';status='passed'})
+Write-Output "Passed $($results.Count) workflow checks. Temporary fixtures are removed."
+} finally { Remove-GeneratedPath $testRoot $tempParent }

@@ -4,10 +4,11 @@
 
 | 工具 | 用途 |
 | --- | --- |
+| Clean-Workspace.ps1 | 预览和清理旧生成物，保留各版两份成品 |
 | Workspace.ps1 | 共用 ID、路径与配置 |
 | Doctor.ps1 / doctor.mjs | 版本、Slidev 能力、Chromium 和可选 PowerPoint |
 | New-Deck.ps1 | 创建独立 deck 与资源 |
-| Export-Deck.ps1 | 三格式导出、检查、快照与版本保护 |
+| Export-Deck.ps1 | PDF 和可编辑 PPTX、失败回滚及临时清理 |
 | Test-Exports.ps1 | PDF 和可选 PPTX 原生渲染、浏览器 QA |
 | inspect-exports.py | 成品结构、页数、对象与哈希 |
 | qa-deck.mjs | 主题无关的逐页浏览器检查 |

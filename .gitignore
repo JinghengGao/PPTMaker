@@ -13,6 +13,7 @@
 **/.remote-assets/
 **/components.d.ts
 **/.export.lock
+**/.export-work/
 **/*.creating
 **/screenshots/
 **/exports/

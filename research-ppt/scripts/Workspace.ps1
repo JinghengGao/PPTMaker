@@ -38,3 +38,12 @@ function Assert-EngineDependencies {
   [void](Get-Command node -ErrorAction Stop)
   [void](Get-Command npx.cmd -ErrorAction Stop)
 }
+
+function Remove-GeneratedPath([string]$Path, [string]$ParentDirectory) {
+  Assert-WithinDirectory $Path $ParentDirectory
+  if (Test-Path -LiteralPath $Path) {
+    $links=Get-ChildItem -LiteralPath $Path -Recurse -Force -ErrorAction Stop | Where-Object { $_.Attributes -band [IO.FileAttributes]::ReparsePoint }
+    if ($links) { throw "Refusing to recursively delete linked content: $Path" }
+    Remove-Item -LiteralPath ([IO.Path]::GetFullPath($Path)) -Recurse -Force
+  }
+}
