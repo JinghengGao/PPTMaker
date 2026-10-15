@@ -21,7 +21,7 @@ PPTMaker -Action Doctor
 PPTMaker -Action New -DeckId my-talk [-Theme default|local-theme-id]
 PPTMaker -Action Preview -DeckId demo [-Port 3030]
 PPTMaker -Action Export -DeckId demo -Version 1.0.0 [-Rebuild]
-PPTMaker -Action Check -DeckId demo -Version 1.0.0 [-PreviewUrl http://localhost:3030] [-RequirePowerPoint]
+PPTMaker -Action Check -DeckId demo -Version 1.0.0 [-PreviewUrl http://localhost:3030] [-RequirePowerPoint] [-AllowKnownToolchainIssues]
 Use powershell.exe -NoProfile -File .\PPTMaker.ps1 before these arguments. See README.md.
 '@
   return

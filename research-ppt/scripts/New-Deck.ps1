@@ -11,7 +11,11 @@ Assert-WithinDirectory $assets $script:EngineDirectory
 if ((Test-Path -LiteralPath $deck) -or (Test-Path -LiteralPath $assets)) { throw 'Deck or assets already exist. Nothing was replaced.' }
 Assert-WorkspaceId $Theme
 $themeValue = 'default'
-$config = [ordered]@{ theme = 'default'; pptxPerSlide = $true }
+# PowerShell 5.1 cannot parse package-lock's empty-string package key.
+# package.json pins the same exact versions, and has no empty property names.
+$enginePackage = Get-Content -LiteralPath (Join-Path $script:EngineDirectory 'package.json') -Raw -Encoding UTF8 | ConvertFrom-Json
+$themeVersion = $enginePackage.dependencies.'@slidev/theme-default'
+$config = [ordered]@{ theme = 'default'; themeVersion = $themeVersion; pptxPerSlide = $true }
 if ($Theme -ne 'default') {
   $themeDirectory = Join-Path $script:EngineDirectory "templates/$Theme"
   Assert-WithinDirectory $themeDirectory $script:EngineDirectory
@@ -21,6 +25,7 @@ if ($Theme -ne 'default') {
   $manifest = Get-Content -LiteralPath (Join-Path $themeDirectory 'manifest.json') -Encoding UTF8 -Raw | ConvertFrom-Json
   if ($manifest.id -ne $Theme -or -not $manifest.version) { throw 'Invalid local theme manifest.' }
   $themeValue = "../../templates/$Theme"
+  $themeVersion = $manifest.version
   $config = [ordered]@{ themeId = $Theme; themeVersion = $manifest.version; pptxPerSlide = $true }
 }
 # CreateNew on the marker prevents two creators from overwriting each other.
@@ -37,7 +42,8 @@ try {
   [IO.File]::WriteAllText((Join-Path $deck 'vite.config.ts'), "export { default } from '../../config/vite.ts'`n", $utf8)
   [IO.File]::WriteAllText((Join-Path $deck 'export.config.json'), ($config | ConvertTo-Json) + "`n", $utf8)
   $brief = Get-Content -LiteralPath (Join-Path $script:EngineDirectory 'decks/_template/brief.md') -Raw -Encoding UTF8
-  [IO.File]::WriteAllText((Join-Path $deck 'brief.md'), ($brief + "`nDeck ID: $DeckId`nTheme: $Theme`n"), $utf8)
+  $brief = $brief.Replace('{{DECK_ID}}', $DeckId).Replace('{{THEME_ID}}', $Theme).Replace('{{THEME_VERSION}}', $themeVersion)
+  [IO.File]::WriteAllText((Join-Path $deck 'brief.md'), $brief, $utf8)
   Copy-Item -LiteralPath (Join-Path $script:EngineDirectory 'decks/_template/QA-CHECKLIST.md') -Destination (Join-Path $deck 'QA.md')
   Copy-Item -LiteralPath (Join-Path $script:EngineDirectory 'public/decks/demo/sample.svg') -Destination (Join-Path $assets 'sample.svg')
 } finally { $creationLock.Dispose(); Remove-Item -LiteralPath $marker }

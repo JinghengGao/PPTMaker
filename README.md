@@ -100,6 +100,7 @@ git diff --cached --stat
 
 - **脚本被策略阻止**：确认可信后，在单次 `powershell.exe` 调用中添加 `-ExecutionPolicy Bypass`，无需修改系统策略。
 - **Chromium 下载失败**：检查网络后在 `research-ppt` 运行 `npx.cmd --no-install playwright install chromium`，再跑 Doctor。
+- **修改 SVG 后预览仍显示旧图**：Slidev 可能内联并缓存素材，停止并重新启动 Preview，再检查实际页面。
 - **版本已存在**：换新版本号，或加 `-Rebuild` 归档旧成品后重导。
 - **导出失败**：查看该 deck 的 `screenshots/v<版本>/export-runs/<时间>/export.log` 和 `failure.json`。
 - **遗留导出锁**：确认没有相关导出进程后，才手动移除该 deck 的 `.export.lock`。

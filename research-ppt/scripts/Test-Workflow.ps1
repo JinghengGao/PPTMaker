@@ -12,7 +12,10 @@ foreach ($name in @('scripts','config')) { Copy-Item -LiteralPath (Join-Path $ro
 foreach ($name in @('decks/demo','decks/_template','public/decks/demo')) {
   $destination=Join-Path $engine $name
   New-Item -ItemType Directory -Path (Split-Path -Parent $destination) -Force | Out-Null
-  Copy-Item -LiteralPath (Join-Path $root "research-ppt/$name") -Destination $destination -Recurse
+  New-Item -ItemType Directory -Path $destination -Force | Out-Null
+  foreach ($file in Get-ChildItem -LiteralPath (Join-Path $root "research-ppt/$name") -File) {
+    Copy-Item -LiteralPath $file.FullName -Destination $destination
+  }
 }
 foreach ($name in @('PPTMaker.ps1','Export-PPT.ps1')) { Copy-Item -LiteralPath (Join-Path $root $name) -Destination $testRoot }
 foreach ($name in @('package.json','package-lock.json')) { Copy-Item -LiteralPath (Join-Path $root "research-ppt/$name") -Destination $engine }
@@ -31,6 +34,8 @@ $cli=Join-Path $testRoot 'PPTMaker.ps1'
 & $cli -Action New -DeckId test-talk | Out-Null
 $source=Join-Path $engine 'decks/test-talk/slides.md'
 $hash=(Get-FileHash -LiteralPath $source).Hash
+$brief=Get-Content -LiteralPath (Join-Path $engine 'decks/test-talk/brief.md') -Raw -Encoding UTF8
+Assert-True ($brief.Contains('test-talk') -and $brief.Contains('default@0.25.0') -and -not $brief.Contains('{{')) 'Created brief must record theme version and deck ID'
 Expect-Failure 'duplicate deck does not overwrite' { & $cli -Action New -DeckId test-talk } 'already exist'
 Assert-True ((Get-FileHash -LiteralPath $source).Hash -eq $hash) 'Duplicate creation modified source'
 Expect-Failure 'path traversal rejected' { & $cli -Action New -DeckId '../escape' } 'pattern|ID must'

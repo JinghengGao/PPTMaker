@@ -7,4 +7,3 @@ param(
 )
 $ErrorActionPreference='Stop'
 & (Join-Path $PSScriptRoot 'research-ppt/scripts/Export-Deck.ps1') -DeckId $DeckId -Version $Version -Rebuild:$Rebuild
-
