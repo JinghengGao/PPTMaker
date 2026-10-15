@@ -1,9 +1,19 @@
 """Inspect staged Git content, never private working directories. Run before commit/push."""
+import hashlib
 import json
 from pathlib import PurePosixPath
 import re
 import subprocess
 import sys
+
+# Reviewed official demo exports. A replacement requires reviewing the files
+# and updating these hashes; other generated or binary files remain blocked.
+PUBLIC_EXPORTS = {
+    'research-ppt/decks/demo/exports/v1.0.0/demo-v1.0.0.pdf':
+        '3b7a73fb76e8cd46bac43b32512ddd7e309c0745ddc7ea913e8a4d4a748530e9',
+    'research-ppt/decks/demo/exports/v1.0.0/demo-v1.0.0-editable.pptx':
+        'c504b1de2b34c08e56da62263e61ebc58436d0f4cfc32825d3116ae54c594be5',
+}
 
 
 def git(*args):
@@ -33,8 +43,15 @@ def main():
     if not paths:
         raise SystemExit('No tracked/staged files. Stage the intended public files first.')
     names, findings = set(paths), []
+    if names.intersection(PUBLIC_EXPORTS):
+        for missing in PUBLIC_EXPORTS.keys() - names:
+            findings.append({'path': missing, 'issue': 'public demo export pair is incomplete'})
     blocked_parts = {'node_modules', 'screenshots', 'exports', 'versions', 'archive', '.agents', '__pycache__'}
     for name in paths:
+        if name in PUBLIC_EXPORTS:
+            if hashlib.sha256(git('show', ':' + name)).hexdigest() != PUBLIC_EXPORTS[name]:
+                findings.append({'path': name, 'issue': 'demo export changed; review and update approved SHA256'})
+            continue
         parts = PurePosixPath(name).parts
         if not allowed(name) or blocked_parts.intersection(parts) or name.endswith(('.pptx', '.pdf', '.zip', '.ttf', '.otf', '.woff', '.woff2', '.pyc', '.export.lock', '.creating')):
             findings.append({'path': name, 'issue': 'not in public file policy'})

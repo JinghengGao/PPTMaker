@@ -36,7 +36,9 @@ python -B research-ppt/scripts/check-public-repo.py
 git diff --cached --stat
 ```
 
-公开检查读取 Git 索引；先审阅完整跟踪清单，再提交。依赖版本固定，不顺带升级。用户 deck、主题、资料和成品默认忽略；Git 忽略不是备份，重要材料需自行保存。
+公开检查读取 Git 索引；先审阅完整跟踪清单，再提交。官方 demo 的源码与 v1.0.0 两份成品纳入 Git，检查器固定这对成品的路径与已审阅 SHA256。重新导出或更换公开版本时，先逐页审阅，再同步更新 .gitignore、PUBLIC_EXPORTS 和 README 链接；其余二进制文件仍会被检查器拒绝。
+
+依赖版本固定，不顺带升级。用户 deck、主题、资料和其他成品默认忽略；Git 忽略不是备份，重要材料需自行保存。
 
 共享代码修改后验证 New、Preview、Export、Check；演示内容变动须逐页观察。测试与渲染使用临时目录，不提交截图、报告、依赖和机器配置。官方 demo 的来源在根第三方声明中，其 slides.md 应与安装包 @slidev/cli/template.md 内容一致，Counter.vue 来自同一版本的官方脚手架。
 

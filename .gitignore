@@ -1,4 +1,4 @@
-# Local research and generated artifacts never belong to the public repository.
+# Ignore local research and generated files; publish only the reviewed demo pair.
 /_local/
 /Relevant Materials/
 **/node_modules/
@@ -22,6 +22,12 @@
 /references/
 /research-ppt/decks/*
 !/research-ppt/decks/demo/
+!/research-ppt/decks/demo/exports/
+/research-ppt/decks/demo/exports/*
+!/research-ppt/decks/demo/exports/v1.0.0/
+/research-ppt/decks/demo/exports/v1.0.0/*
+!/research-ppt/decks/demo/exports/v1.0.0/demo-v1.0.0.pdf
+!/research-ppt/decks/demo/exports/v1.0.0/demo-v1.0.0-editable.pptx
 /research-ppt/templates/
 /research-ppt/public/
 /research-ppt/skills-lock.json

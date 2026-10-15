@@ -22,6 +22,8 @@ cd ..
 
 **demo 是 Slidev 53.0.0 的官方 Starter 原稿及 Counter 组件**，使用官方 Seriph 主题。在线图片、推文、字体及 PlantUML 示例需要网络，离线时可能无法完整显示。
 
+仓库附带 v1.0.0 的 [PDF](research-ppt/decks/demo/exports/v1.0.0/demo-v1.0.0.pdf) 和 [可编辑 PPTX](research-ppt/decks/demo/exports/v1.0.0/demo-v1.0.0-editable.pptx)，克隆后可直接打开。该版 PDF 的第 2 页渐变标题在 Windows 渲染中异常，第 6 页在线推文未显示；官方随机封面也会使两格式背景不同。源码保持原样。
+
 ## 制作自己的演示
 
 ```powershell
@@ -47,10 +49,10 @@ research-ppt/
   package.json / package-lock.json
   config/vite.ts               共用静态资源配置
   scripts/                     新建、导出、检查及回归测试
-  decks/demo/                  官方示例与其 Counter 组件
+  decks/demo/                  官方源稿、Counter 及 v1.0.0 的 PDF/PPTX
 ```
 
-自己的 deck、本地主题（templates/）、素材（public/）、参考材料（根 references/）和成品默认不进入 Git，按需创建。每套演示直接使用自己的 slides.md，工程根目录没有重复源稿。依赖通过 npm 安装，本机 Skills 不随仓库分发。
+demo 源码及上述两份成品纳入 Git；自己的 deck、本地主题（templates/）、素材（public/）、参考材料（根 references/）和其他成品默认忽略，按需创建。每套演示直接使用自己的 slides.md，工程根目录没有重复源稿。依赖通过 npm 安装，本机 Skills 不随仓库分发。
 
 [创作流程与 AI 提示词](docs/WORKFLOW.md) · [维护与验证](docs/MAINTAINING.md)
 
