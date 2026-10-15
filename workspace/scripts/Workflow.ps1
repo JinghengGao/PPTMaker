@@ -1,6 +1,6 @@
 # Shared workflows behind PPTMaker.ps1. Windows PowerShell 5.1 compatible.
 $script:ScriptsDirectory = $PSScriptRoot
-$script:EngineDirectory = [IO.Path]::GetFullPath((Split-Path -Parent $PSScriptRoot))
+$script:WorkspaceDirectory = [IO.Path]::GetFullPath((Split-Path -Parent $PSScriptRoot))
 
 function Assert-WorkspaceId([string]$Value) {
   if ($Value -notmatch '^[a-z0-9]+(?:-[a-z0-9]+)*$') { throw 'ID must contain lowercase letters, numbers and single hyphens.' }
@@ -22,8 +22,8 @@ function Assert-WithinDirectory([string]$Path, [string]$Directory) {
 
 function Get-DeckDirectory([string]$DeckId, [switch]$MustExist) {
   Assert-WorkspaceId $DeckId
-  $path = Join-Path $script:EngineDirectory "decks/$DeckId"
-  Assert-WithinDirectory $path $script:EngineDirectory
+  $path = Join-Path $script:WorkspaceDirectory "decks/$DeckId"
+  Assert-WithinDirectory $path $script:WorkspaceDirectory
   if ($MustExist -and -not (Test-Path -LiteralPath (Join-Path $path 'slides.md') -PathType Leaf)) { throw "Deck source missing: $path" }
   return $path
 }
@@ -46,8 +46,8 @@ function Open-DeckLock([string]$DeckDirectory, [string]$Version) {
   } catch { $handle.Dispose(); Remove-Item -LiteralPath $path; throw }
 }
 
-function Assert-EngineDependencies {
-  if (-not (Test-Path -LiteralPath (Join-Path $script:EngineDirectory 'node_modules/@slidev/cli/package.json'))) { throw 'Slidev is missing. Run npm.cmd ci in research-ppt.' }
+function Assert-WorkspaceDependencies {
+  if (-not (Test-Path -LiteralPath (Join-Path $script:WorkspaceDirectory 'node_modules/@slidev/cli/package.json'))) { throw 'Slidev is missing. Run npm.cmd ci in workspace.' }
   [void](Get-Command node -ErrorAction Stop)
   [void](Get-Command npx.cmd -ErrorAction Stop)
 }
@@ -74,9 +74,9 @@ function Test-WorkspaceEnvironment {
       Write-Output "[OK] $command $value"
     } catch { Write-Output "[MISSING] $command"; $failed = $true }
   }
-  Push-Location $script:EngineDirectory
+  Push-Location $script:WorkspaceDirectory
   try {
-    & node (Join-Path $script:ScriptsDirectory 'browser.mjs') --doctor
+    & node (Join-Path $script:ScriptsDirectory 'check-browser.mjs') --doctor
     if ($LASTEXITCODE -ne 0) { $failed = $true }
   } finally { Pop-Location }
   if ([Type]::GetTypeFromProgID('PowerPoint.Application')) { Write-Output '[OPTIONAL OK] PowerPoint registered; Check verifies actual rendering.' }
@@ -92,22 +92,22 @@ function New-WorkspaceDeck {
   )
   $ErrorActionPreference = 'Stop'
   $deck = Get-DeckDirectory $DeckId
-  $assets = Join-Path $script:EngineDirectory "public/decks/$DeckId"
-  Assert-WithinDirectory $assets $script:EngineDirectory
+  $assets = Join-Path $script:WorkspaceDirectory "public/decks/$DeckId"
+  Assert-WithinDirectory $assets $script:WorkspaceDirectory
   if ((Test-Path -LiteralPath $deck) -or (Test-Path -LiteralPath $assets)) { throw 'Deck or assets already exist. Nothing was replaced.' }
   $aliases = @{ TemplateMC = 'mc'; TemplateNKU = 'nku' }
   if ($aliases.ContainsKey($Theme)) { $Theme = $aliases[$Theme] }
   Assert-WorkspaceId $Theme
   $themeValue = 'default'
-  $starter = Join-Path $script:EngineDirectory 'decks/demo/slides.md'
+  $starter = Join-Path $script:WorkspaceDirectory 'decks/demo/slides.md'
   # PowerShell 5.1 cannot parse package-lock's empty-string package key.
   # package.json pins the same exact versions, and has no empty property names.
-  $enginePackage = Get-Content -LiteralPath (Join-Path $script:EngineDirectory 'package.json') -Raw -Encoding UTF8 | ConvertFrom-Json
-  $themeVersion = $enginePackage.dependencies.'@slidev/theme-default'
+  $workspacePackage = Get-Content -LiteralPath (Join-Path $script:WorkspaceDirectory 'package.json') -Raw -Encoding UTF8 | ConvertFrom-Json
+  $themeVersion = $workspacePackage.dependencies.'@slidev/theme-default'
   $config = [ordered]@{ theme = 'default'; themeVersion = $themeVersion }
   if ($Theme -ne 'default') {
-    $sourceDirectory = Join-Path $script:EngineDirectory "decks/$Theme"
-    Assert-WithinDirectory $sourceDirectory $script:EngineDirectory
+    $sourceDirectory = Join-Path $script:WorkspaceDirectory "decks/$Theme"
+    Assert-WithinDirectory $sourceDirectory $script:WorkspaceDirectory
     foreach ($name in @('theme/package.json','manifest.json','STYLE-GUIDE.md')) {
       if (-not (Test-Path -LiteralPath (Join-Path $sourceDirectory $name) -PathType Leaf)) { throw "Local theme is incomplete: $Theme/$name" }
     }
@@ -176,7 +176,7 @@ function Export-WorkspaceDeck {
     [Parameter(Mandatory=$true)][ValidatePattern('^\d+\.\d+\.\d+$')][string]$Version
   )
   $ErrorActionPreference='Stop'
-  $engineDirectory=$script:EngineDirectory
+  $workspaceDirectory=$script:WorkspaceDirectory
   $deckDirectory=Get-DeckDirectory $DeckId -MustExist
   $entry=Join-Path $deckDirectory 'slides.md'
   $outputDirectory=Join-Path $deckDirectory "exports/v$Version"
@@ -188,7 +188,7 @@ function Export-WorkspaceDeck {
   $ownsWork=$false
   $published=$false
   $success=$false
-  Assert-EngineDependencies
+  Assert-WorkspaceDependencies
   [void](Get-Command python -ErrorAction Stop)
   $config=Get-DeckConfig $deckDirectory
   $postprocessor=$null
@@ -205,7 +205,7 @@ function Export-WorkspaceDeck {
     New-Item -ItemType Directory -Path $prepared -Force | Out-Null
     $ownsWork=$true
     New-Item -ItemType Directory -Path (Join-Path $work 'reports') | Out-Null
-    Push-Location $engineDirectory
+    Push-Location $workspaceDirectory
     try {
       $stem=Join-Path $prepared "$DeckId-v$Version"
       & npx.cmd --no-install slidev export $entry --format pdf --output ($stem+'.pdf') --with-toc --with-clicks false --timeout 60000 --wait 800
@@ -216,7 +216,7 @@ function Export-WorkspaceDeck {
         & python -B $postprocessor ($stem+'-editable.pptx') --report (Join-Path $work 'reports/editable-fixes.json')
         if ($LASTEXITCODE -ne 0) { throw 'Editable PPTX postprocessing failed' }
       }
-      & python -B (Join-Path $script:ScriptsDirectory 'inspect-exports.py') --deck $deckDirectory --version $Version --directory $prepared --output (Join-Path $work 'prepared.json') --prepare
+      & python -B (Join-Path $script:ScriptsDirectory 'inspect_exports.py') --deck $deckDirectory --version $Version --directory $prepared --output (Join-Path $work 'prepared.json') --prepare
       if ($LASTEXITCODE -ne 0) { throw 'Prepared export integrity check failed' }
       New-Item -ItemType Directory -Path (Split-Path -Parent $outputDirectory) -Force | Out-Null
       # The previous pair exists only during this transaction, for rollback.
@@ -224,7 +224,7 @@ function Export-WorkspaceDeck {
       try {
         Move-Item -LiteralPath $prepared -Destination $outputDirectory
         $published=$true
-        & python -B (Join-Path $script:ScriptsDirectory 'inspect-exports.py') --deck $deckDirectory --version $Version --output (Join-Path $work 'published.json')
+        & python -B (Join-Path $script:ScriptsDirectory 'inspect_exports.py') --deck $deckDirectory --version $Version --output (Join-Path $work 'published.json')
         if ($LASTEXITCODE -ne 0) { throw 'Published export integrity check failed' }
         $success=$true
       } catch {
@@ -266,25 +266,25 @@ function Test-WorkspaceDeck {
     $tempParent=[IO.Path]::GetTempPath()
     $work=Join-Path $tempParent ('pptmaker-check-'+[Guid]::NewGuid().ToString('N'))
     New-Item -ItemType Directory -Path $work | Out-Null
-    Push-Location $script:EngineDirectory
+    Push-Location $script:WorkspaceDirectory
     try {
-      & python -B (Join-Path $script:ScriptsDirectory 'inspect-exports.py') --deck $deck --version $Version --output (Join-Path $work 'deliverables.json')
+      & python -B (Join-Path $script:ScriptsDirectory 'inspect_exports.py') --deck $deck --version $Version --output (Join-Path $work 'deliverables.json')
       if ($LASTEXITCODE -ne 0) { throw 'Deliverable integrity check failed' }
       $audit=Get-Content -LiteralPath (Join-Path $work 'deliverables.json') -Raw -Encoding UTF8 | ConvertFrom-Json
       $stem=Join-Path $exports "$DeckId-v$Version"
-      & powershell.exe -NoProfile -File (Join-Path $script:ScriptsDirectory 'Render.ps1') -Format Pdf -InputFile ($stem+'.pdf') -OutputDirectory (Join-Path $work 'pdf') -Width 1600
+      & powershell.exe -NoProfile -File (Join-Path $script:ScriptsDirectory 'Render-Exports.ps1') -Format Pdf -InputFile ($stem+'.pdf') -OutputDirectory (Join-Path $work 'pdf') -Width 1600
       if ($LASTEXITCODE -ne 0) { throw 'Native PDF rendering failed' }
       $pdf=Get-Content -LiteralPath (Join-Path $work 'pdf/pdf-inspection.json') -Raw -Encoding UTF8 | ConvertFrom-Json
       if ($pdf.page_count -ne $audit.slides -or @(Get-ChildItem -LiteralPath (Join-Path $work 'pdf') -Filter 'slide-*.png').Count -ne $audit.slides) { throw 'PDF page count differs or rendering is incomplete' }
       if ($hasPowerPoint) {
-        & powershell.exe -NoProfile -File (Join-Path $script:ScriptsDirectory 'Render.ps1') -Format PowerPoint -InputFile ($stem+'-editable.pptx') -OutputDirectory (Join-Path $work 'editable') -Width 1600
+        & powershell.exe -NoProfile -File (Join-Path $script:ScriptsDirectory 'Render-Exports.ps1') -Format PowerPoint -InputFile ($stem+'-editable.pptx') -OutputDirectory (Join-Path $work 'editable') -Width 1600
         if ($LASTEXITCODE -ne 0) { throw 'Native PowerPoint rendering failed' }
         $render=Get-Content -LiteralPath (Join-Path $work 'editable/powerpoint-inspection.json') -Raw -Encoding UTF8 | ConvertFrom-Json
         if ($render.slide_count -ne $audit.slides -or @(Get-ChildItem -LiteralPath (Join-Path $work 'editable') -Filter 'slide-*.png').Count -ne $audit.slides -or $render.sha256.ToLowerInvariant() -ne (Get-FileHash -LiteralPath ($stem+'-editable.pptx')).Hash.ToLowerInvariant()) { throw 'PPTX evidence mismatch' }
       }
       $browserStatus='not requested'
       if ($PreviewUrl) {
-        $qa=@((Join-Path $script:ScriptsDirectory 'browser.mjs'),$PreviewUrl,(Join-Path $work 'browser'),$audit.slides)
+        $qa=@((Join-Path $script:ScriptsDirectory 'check-browser.mjs'),$PreviewUrl,(Join-Path $work 'browser'),$audit.slides)
         if ($AllowKnownToolchainIssues) { $qa+='--allow-known-toolchain-issues' }
         & node @qa
         if ($LASTEXITCODE -ne 0) { throw 'Browser preview check failed' }

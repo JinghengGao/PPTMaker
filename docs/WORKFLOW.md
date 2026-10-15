@@ -1,6 +1,6 @@
 # 创作流程
 
-初始仓库的三套完整示例在 research-ppt/decks/ 下并列：demo 为 Slidev 官方示例，mc、nku 分别使用 TemplateMC、TemplateNKU 样式。三套均可直接 Preview、Export、Check；无需先 New。这三个保留 ID 不用于创建自己的作品。
+初始仓库的三套完整示例在 workspace/decks/ 下并列：demo 为 Slidev 官方示例，mc、nku 分别使用 TemplateMC、TemplateNKU 样式。三套均可直接 Preview、Export、Check；无需先 New。这三个保留 ID 不用于创建自己的作品。
 
 ## 新演示
 
@@ -17,7 +17,7 @@
 
 参考资料按需放入根 references/，原件只读。逐页观察并记录字号、配色、网格、标题与图表的页码依据，未知属性写待确认。
 
-在 research-ppt/decks/<id>/ 按 mc、nku 的方式组织：
+在 workspace/decks/<id>/ 按 mc、nku 的方式组织：
 
 | 路径 | 内容 |
 | --- | --- |

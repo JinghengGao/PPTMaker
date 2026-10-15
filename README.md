@@ -9,7 +9,7 @@ Windows 优先；不内置模型 API。本项目许可证尚未确定，第三�
 需要 Windows PowerShell 5.1、Node.js ≥22.12（建议 24 LTS）、Python 3.10+ 和 Git。在仓库根目录运行：
 
 ```powershell
-cd research-ppt
+cd workspace
 npm.cmd ci
 npx.cmd --no-install playwright install chromium
 cd ..
@@ -35,7 +35,7 @@ cd ..
 
 New 从官方示例创建独立副本，默认使用 default 主题；支持 `-Theme mc`、`-Theme nku` 或其他包含 theme/ 的示例 ID，同名目录不会覆盖。编辑该 deck 的 slides.md，任务与检查结论填写在 brief.md、QA.md；自己的素材放入 public/decks/my-talk/，使用 `/decks/my-talk/文件名` 引用。
 
-Deck ID 使用小写字母、数字及连字符；版本使用 X.Y.Z。成品位于 `research-ppt/decks/my-talk/exports/v1.0.0/`。同版本重导成功后替换，失败保留旧成品，其他版本不动。临时截图和报告结束后删除。
+Deck ID 使用小写字母、数字及连字符；版本使用 X.Y.Z。成品位于 `workspace/decks/my-talk/exports/v1.0.0/`。同版本重导成功后替换，失败保留旧成品，其他版本不动。临时截图和报告结束后删除。
 
 demo、mc、nku 是内置示例的保留 ID；自己的作品使用其他 ID。
 
@@ -45,9 +45,9 @@ Check 检查成品结构并渲染 PDF；安装 PowerPoint 时还会原生渲染 
 
 | 示例 ID | 特征 | 使用说明与现成文件 |
 | --- | --- | --- |
-| demo | Slidev 官方 Starter / Seriph，11 页 | [源稿](research-ppt/decks/demo/slides.md) · [PDF](research-ppt/decks/demo/exports/v1.0.0/demo-v1.0.0.pdf) · [PPTX](research-ppt/decks/demo/exports/v1.0.0/demo-v1.0.0-editable.pptx) |
-| mc | TemplateMC 蓝色科研主题，8 页 | [主题说明](research-ppt/decks/mc/STYLE-GUIDE.md) · [PDF](research-ppt/decks/mc/exports/v1.0.0/mc-v1.0.0.pdf) · [PPTX](research-ppt/decks/mc/exports/v1.0.0/mc-v1.0.0-editable.pptx) |
-| nku | TemplateNKU 南开紫及原版校徽、建筑，8 页 | [主题说明](research-ppt/decks/nku/STYLE-GUIDE.md) · [PDF](research-ppt/decks/nku/exports/v1.0.0/nku-v1.0.0.pdf) · [PPTX](research-ppt/decks/nku/exports/v1.0.0/nku-v1.0.0-editable.pptx) |
+| demo | Slidev 官方 Starter / Seriph，11 页 | [源稿](workspace/decks/demo/slides.md) · [PDF](workspace/decks/demo/exports/v1.0.0/demo-v1.0.0.pdf) · [PPTX](workspace/decks/demo/exports/v1.0.0/demo-v1.0.0-editable.pptx) |
+| mc | TemplateMC 蓝色科研主题，8 页 | [主题说明](workspace/decks/mc/STYLE-GUIDE.md) · [PDF](workspace/decks/mc/exports/v1.0.0/mc-v1.0.0.pdf) · [PPTX](workspace/decks/mc/exports/v1.0.0/mc-v1.0.0-editable.pptx) |
+| nku | TemplateNKU 南开紫及原版校徽、建筑，8 页 | [主题说明](workspace/decks/nku/STYLE-GUIDE.md) · [PDF](workspace/decks/nku/exports/v1.0.0/nku-v1.0.0.pdf) · [PPTX](workspace/decks/nku/exports/v1.0.0/nku-v1.0.0-editable.pptx) |
 
 可直接选择任意示例运行；切换前用 Ctrl+C 停止当前预览：
 
@@ -79,16 +79,22 @@ New 会复制对应主题的示例与所需图片。普通页面用 `heading` �
 PPTMaker.ps1                    日常入口：Doctor / New / Preview / Export / Check
 README.md / AGENTS.md           使用说明与 AI 工作约定
 docs/                          创作流程与维护说明
-research-ppt/
+workspace/
   package.json / package-lock.json
-  config/vite.ts               共用静态资源配置
-  scripts/                     四个内部文件：工作流、浏览器、渲染、结构检查
+  config/vite.ts               共用素材路径、文件访问范围和构建规则
+  scripts/
+    Workflow.ps1               环境、新建、导出及检查流程
+    check-browser.mjs          Chromium 环境与逐页预览检查
+    Render-Exports.ps1         PDF / PowerPoint 原生渲染
+    inspect_exports.py         PDF / PPTX 结构与可编辑文本检查
   decks/
     demo/                      官方源稿、Counter 及 PDF/PPTX
     mc/                        slides.md、assets/、theme/、exports/
     nku/                       slides.md、assets/、theme/、exports/
   shared/                      MC、NKU 共用的页面骨架和基础样式
 ```
+
+根目录提供使用入口和说明；workspace/ 集中管理 Slidev 依赖、演示与运行工具。在该目录执行 `npm.cmd ci`，即可安装锁定版本的 Slidev。config/vite.ts 供 mc、nku 和新建作品复用：统一 public/ 素材路径，允许读取工作区内的公式字体，并防止构建时复制整个私人素材目录。
 
 官方 demo、两套内置主题及其已审阅素材和示例成品纳入 Git；自己的 deck、素材（public/）、参考材料（根 references/）和其他成品默认忽略，按需创建。每套演示直接使用自己的 slides.md，工程根目录没有重复源稿。依赖通过 npm 安装，本机 Skills 不随仓库分发。
 

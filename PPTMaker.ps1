@@ -13,7 +13,7 @@ param(
   [switch]$AllowKnownToolchainIssues
 )
 $ErrorActionPreference = 'Stop'
-. (Join-Path $PSScriptRoot 'research-ppt/scripts/Workspace.ps1')
+. (Join-Path $PSScriptRoot 'workspace/scripts/Workflow.ps1')
 if ($Action -eq 'Help') {
   Write-Output @'
 PPTMaker -Action Doctor
@@ -33,8 +33,8 @@ switch ($Action) {
   'New' { New-WorkspaceDeck -DeckId $DeckId -Theme $Theme }
   'Preview' {
     $deck = Get-DeckDirectory $DeckId -MustExist
-    Assert-EngineDependencies
-    Push-Location $script:EngineDirectory
+    Assert-WorkspaceDependencies
+    Push-Location $script:WorkspaceDirectory
     try {
       & npx.cmd --no-install slidev (Join-Path $deck 'slides.md') --port $Port --bind 127.0.0.1
       if ($LASTEXITCODE -ne 0) { throw 'Preview failed.' }

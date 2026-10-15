@@ -6,6 +6,7 @@
 - 公开 Git 包含通用工具、说明、官方 demo、TemplateMC/TemplateNKU 主题，以及经审阅的素材和示例 PDF/PPTX。私人资料、本机 Skills、依赖、缓存及其他成品不提交或上传。
 - demo 的 slides.md 与 Counter.vue 保持 Slidev v53.0.0 官方内容，不改写成自制示例。新作品用 New 创建独立 deck，直接编辑其 slides.md。
 - 初始仓库在 decks/ 下并列放置 demo、mc、nku，均可直接 Preview、Export、Check。这三个 ID 保留给内置示例，不设置单独的 templates/ 目录。
+- 根目录保留入口和文档；Slidev 依赖、decks/、shared/、config/ 和 scripts/ 集中在 workspace/，路径使用相对引用。
 - 不编造论文、数据、结果和引用；未知内容明确占位。默认 16:9，每页一个观点，溢出时重排或拆页。
 - 学习参考时逐页观察，记录字体、配色、布局的页码依据；无依据写待确认。MC、NKU 的主题实现位于各自 theme/，专属样式不放到全局，更新需验证受影响作品。
 - MC、NKU 通过 shared/ 复用中性页面骨架，配色和品牌素材留在各自 theme/；New 从所选示例的 manifest.starter 创建源稿，starter 必须位于该示例内。保留 TemplateNKU 原始校徽与建筑插图及其来源声明。

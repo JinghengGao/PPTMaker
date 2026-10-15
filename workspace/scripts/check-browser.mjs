@@ -37,7 +37,7 @@ async function checkPreview() {
   const [baseRaw, output, countRaw, knownIssueFlag] = process.argv.slice(2)
   if (knownIssueFlag && knownIssueFlag !== '--allow-known-toolchain-issues') throw new Error('Unknown QA option')
   if (!baseRaw || !output || !/^[1-9]\d*$/.test(countRaw || '')) {
-    throw new Error('Usage: node browser.mjs <local-preview-url> <output-directory> <slide-count>')
+    throw new Error('Usage: node check-browser.mjs <local-preview-url> <output-directory> <slide-count>')
   }
   const base = new URL(baseRaw)
   if (base.protocol !== 'http:' || !['localhost', '127.0.0.1'].includes(base.hostname) || base.pathname !== '/' || base.search || base.hash || base.username || base.password) {
