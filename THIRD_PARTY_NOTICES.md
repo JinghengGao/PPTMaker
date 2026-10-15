@@ -27,7 +27,7 @@ demo 原样取自 Slidev v53.0.0：
 - [TemplateMC](https://github.com/GrokCV/TemplateMC/tree/cb087ed5f4d65719826d3b883718d05c43fa6019)：来源提交 cb087ed5f4d65719826d3b883718d05c43fa6019。
 - [TemplateNKU](https://github.com/GrokCV/TemplateNKU/tree/659c1135d9481141c24aee05bff0cdc6b4bb5ae3)：来源提交 659c1135d9481141c24aee05bff0cdc6b4bb5ae3。
 
-示例照片沿用 TemplateMC 的 image/demo.jpg；TemplateNKU 的校徽及建筑插图分别沿用 image/Cover image/Logo.png、element_1.png、element_2.png，未重绘。具体原路径与 SHA256 记录在各主题 manifest.json。普通示例文字、任务书和演示数据重新编写，不沿用参考原稿的作者主页、科研项目或实验结论；字体文件不分发。
+示例照片沿用 TemplateMC 的 image/demo.jpg；TemplateNKU 的校徽及建筑插图分别沿用 image/Cover image/Logo.png、element_1.png、element_2.png，未重绘。具体原路径与 SHA256 记录在 decks/mc、decks/nku 的 manifest.json。普通示例文字、任务书和演示数据重新编写，不沿用参考原稿的作者主页、科研项目或实验结论；字体文件不分发。
 
 上述两个来源仓库在所记录提交中未附 LICENSE，本工作区不替上游授予许可。模板设计、校园标识、建筑插图和照片的权利仍归各自权利人，公开可访问不等于已获得开放许可。本项目自身许可证也仍待确定。
 

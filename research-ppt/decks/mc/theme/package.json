@@ -1,0 +1,29 @@
+{
+  "name": "slidev-theme-mc",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "description": "TemplateMC local Slidev theme for PPTMaker",
+  "engines": {
+    "slidev": ">=53.0.0"
+  },
+  "slidev": {
+    "colorSchema": "light",
+    "defaults": {
+      "aspectRatio": "16/9",
+      "canvasWidth": 960,
+      "fonts": {
+        "sans": "Arial,Microsoft YaHei,Noto Sans CJK SC",
+        "local": [
+          "Arial",
+          "Microsoft YaHei",
+          "Noto Sans CJK SC"
+        ],
+        "webfonts": [],
+        "provider": "none"
+      },
+      "transition": "none",
+      "wakeLock": false
+    }
+  }
+}

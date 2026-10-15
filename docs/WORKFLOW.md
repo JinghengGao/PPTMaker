@@ -1,6 +1,6 @@
 # 创作流程
 
-初始仓库的三套完整示例可直接使用 Preview、Export、Check：demo 为 Slidev 官方示例，template-mc、template-nku 为两套主题示例，源稿分别位于主题 examples/。无需先 New；这三个保留 ID 不用于创建自己的作品。
+初始仓库的三套完整示例在 research-ppt/decks/ 下并列：demo 为 Slidev 官方示例，mc、nku 分别使用 TemplateMC、TemplateNKU 样式。三套均可直接 Preview、Export、Check；无需先 New。这三个保留 ID 不用于创建自己的作品。
 
 ## 新演示
 
@@ -11,24 +11,24 @@
 
 每版保留 PDF 与可编辑 PPTX。同版重导成功后替换，其他版本保留；不积累截图、日志、输入快照和重导归档。
 
-内置主题可用 TemplateMC、TemplateNKU（或 template-mc、template-nku）选择，默认仍为官方 default。New 优先读取本地主题 manifest.json 的 starter，复制对应示例的 assets/ 与 components/；没有 starter 时采用官方示例。starter 必须位于该主题内部，不能跳出目录。
+用 -Theme mc 或 -Theme nku 选择样式，也接受 TemplateMC、TemplateNKU 名称；默认仍为官方 default。New 从来源示例 manifest.json 的 starter 复制源稿、assets/ 与 components/，并引用其 theme/。starter 必须位于来源示例内部，不能跳出目录。
 
-## 从参考创建本地主题
+## 从参考创建可复用示例
 
-参考资料按需放入根 references/，原件只读。归档时复制到独立目录；逐页渲染观察，记录字号、配色、网格、标题与图表的页码依据，未知属性写待确认。
+参考资料按需放入根 references/，原件只读。逐页观察并记录字号、配色、网格、标题与图表的页码依据，未知属性写待确认。
 
-在 research-ppt/templates/<id>/ 创建独立 Slidev Theme：
+在 research-ppt/decks/<id>/ 按 mc、nku 的方式组织：
 
 | 路径 | 内容 |
 | --- | --- |
-| package.json | 名称 slidev-theme-<id>，本地主题元数据 |
-| manifest.json | id、name、version、source_reference、status、适用场景和验证日期 |
-| STYLE-GUIDE.md | 带参考页码的字体、配色、布局及图表规则 |
-| styles/index.css | 主题专属样式，优先限制在 .slidev-layout 下 |
-| layouts/、components/ | 按需抽象的布局与组件 |
-| examples/ | 典型版式源稿，截图仅临时验收 |
+| slides.md、assets/ | 完整示例源稿与插图 |
+| manifest.json | id、name、version、starter、来源与验证记录 |
+| STYLE-GUIDE.md | 带参考页码的设计规则 |
+| theme/package.json | 名称 slidev-theme-<id>，Slidev 本地主题元数据 |
+| theme/styles/、theme/layouts/、theme/assets/ | 该示例专属的样式、布局与品牌素材 |
+| exports/vX.Y.Z/ | 仅 PDF 与可编辑 PPTX |
 
-区分原稿实际布局与延伸设计；不把参考作者身份或论文图像当作默认素材，不打包受版权保护的字体。先验证典型页的预览和导出，再标记 validated。专属样式和布局不进入引擎全局目录，更新需验证既有作品。
+区分原稿实际布局与延伸设计，不把参考作者身份或论文图像当作默认素材，不打包受版权保护的字体。先验证预览和导出，再标记 validated。中性骨架可以复用 shared/，专属配色不进入共享目录。
 
 ## AI 提示词
 

@@ -1,6 +1,0 @@
-@import '../../_shared/base.css';
-.ppt-theme[data-variant="mc"] { --theme-primary: #1c4682; --theme-accent: #1c4682; --theme-light: #4682b4; --theme-dark: #0a2850; --theme-pale: #e8edf3; --theme-pale-border: #c4d0e3; }
-.ppt-theme[data-variant="mc"] .cover-brand { display: none; }
-.ppt-theme[data-variant="mc"] .cover-band { height: 268px; }
-.ppt-theme[data-variant="mc"][data-mode="agenda"] .theme-body { padding-left: 80px; }
-.ppt-theme[data-variant="mc"] .agenda-items li { margin: 15px 0; }

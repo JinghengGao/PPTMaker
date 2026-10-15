@@ -33,11 +33,11 @@ cd ..
 .\PPTMaker.ps1 -Action Check -DeckId my-talk -Version 1.0.0
 ```
 
-New 从官方示例创建独立副本，默认使用 default 主题；支持 `-Theme <本地主题ID>`，同名目录不会覆盖。编辑该 deck 的 slides.md，任务与检查结论填写在 brief.md、QA.md；自己的素材放入 public/decks/my-talk/，使用 `/decks/my-talk/文件名` 引用。
+New 从官方示例创建独立副本，默认使用 default 主题；支持 `-Theme mc`、`-Theme nku` 或其他包含 theme/ 的示例 ID，同名目录不会覆盖。编辑该 deck 的 slides.md，任务与检查结论填写在 brief.md、QA.md；自己的素材放入 public/decks/my-talk/，使用 `/decks/my-talk/文件名` 引用。
 
 Deck ID 使用小写字母、数字及连字符；版本使用 X.Y.Z。成品位于 `research-ppt/decks/my-talk/exports/v1.0.0/`。同版本重导成功后替换，失败保留旧成品，其他版本不动。临时截图和报告结束后删除。
 
-demo、template-mc、template-nku 是内置示例的保留 ID；自己的作品使用其他 ID。
+demo、mc、nku 是内置示例的保留 ID；自己的作品使用其他 ID。
 
 Check 检查成品结构并渲染 PDF；安装 PowerPoint 时还会原生渲染 PPTX。可加 `-RequirePowerPoint` 要求原生检查，或 `-PreviewUrl http://localhost:3030` 检查正在预览的全部页面。人工仍需打开最终文件逐页复核；公式、SVG 和复杂效果可能是图片，不保证所有对象可编辑。
 
@@ -46,32 +46,32 @@ Check 检查成品结构并渲染 PDF；安装 PowerPoint 时还会原生渲染 
 | 示例 ID | 特征 | 使用说明与现成文件 |
 | --- | --- | --- |
 | demo | Slidev 官方 Starter / Seriph，11 页 | [源稿](research-ppt/decks/demo/slides.md) · [PDF](research-ppt/decks/demo/exports/v1.0.0/demo-v1.0.0.pdf) · [PPTX](research-ppt/decks/demo/exports/v1.0.0/demo-v1.0.0-editable.pptx) |
-| template-mc | TemplateMC 蓝色科研主题，8 页 | [主题说明](research-ppt/templates/template-mc/STYLE-GUIDE.md) · [PDF](research-ppt/templates/template-mc/examples/exports/v1.0.0/template-mc-v1.0.0.pdf) · [PPTX](research-ppt/templates/template-mc/examples/exports/v1.0.0/template-mc-v1.0.0-editable.pptx) |
-| template-nku | TemplateNKU 南开紫及原版校徽、建筑，8 页 | [主题说明](research-ppt/templates/template-nku/STYLE-GUIDE.md) · [PDF](research-ppt/templates/template-nku/examples/exports/v1.0.0/template-nku-v1.0.0.pdf) · [PPTX](research-ppt/templates/template-nku/examples/exports/v1.0.0/template-nku-v1.0.0-editable.pptx) |
+| mc | TemplateMC 蓝色科研主题，8 页 | [主题说明](research-ppt/decks/mc/STYLE-GUIDE.md) · [PDF](research-ppt/decks/mc/exports/v1.0.0/mc-v1.0.0.pdf) · [PPTX](research-ppt/decks/mc/exports/v1.0.0/mc-v1.0.0-editable.pptx) |
+| nku | TemplateNKU 南开紫及原版校徽、建筑，8 页 | [主题说明](research-ppt/decks/nku/STYLE-GUIDE.md) · [PDF](research-ppt/decks/nku/exports/v1.0.0/nku-v1.0.0.pdf) · [PPTX](research-ppt/decks/nku/exports/v1.0.0/nku-v1.0.0-editable.pptx) |
 
 可直接选择任意示例运行；切换前用 Ctrl+C 停止当前预览：
 
 ```powershell
 .\PPTMaker.ps1 -Action Preview -DeckId demo
-.\PPTMaker.ps1 -Action Preview -DeckId template-mc
-.\PPTMaker.ps1 -Action Preview -DeckId template-nku
+.\PPTMaker.ps1 -Action Preview -DeckId mc
+.\PPTMaker.ps1 -Action Preview -DeckId nku
 ```
 
 三套示例同样支持 Export 和 Check，例如：
 
 ```powershell
-.\PPTMaker.ps1 -Action Export -DeckId template-mc -Version 1.1.0
-.\PPTMaker.ps1 -Action Check -DeckId template-mc -Version 1.1.0
+.\PPTMaker.ps1 -Action Export -DeckId mc -Version 1.1.0
+.\PPTMaker.ps1 -Action Check -DeckId mc -Version 1.1.0
 ```
 
-MC、NKU 示例成品保存在各主题的 `examples/exports/`，不另建重复 deck。制作自己的演示时再运行 New：
+demo、mc、nku 并列保存在 decks/，每套的源稿、素材和成品都在自己的目录。制作自己的演示时再运行 New：
 
 ```powershell
-.\PPTMaker.ps1 -Action New -DeckId mc-talk -Theme TemplateMC
-.\PPTMaker.ps1 -Action New -DeckId nku-talk -Theme TemplateNKU
+.\PPTMaker.ps1 -Action New -DeckId mc-talk -Theme mc
+.\PPTMaker.ps1 -Action New -DeckId nku-talk -Theme nku
 ```
 
-New 会复制对应主题的示例与所需图片。普通页面用 `heading` 设置顶部标题；目录用 `agenda` 数组和 `active` 设置当前条目。NKU 支持 `agendaStyle: tiles` 或 `list`。配色、页脚、布局与封面素材互相隔离；共同页面骨架保存在 templates/_shared。上游来源与素材权利见第三方声明。
+New 会复制对应主题的示例与所需图片。普通页面用 `heading` 设置顶部标题；目录用 `agenda` 数组和 `active` 设置当前条目。NKU 支持 `agendaStyle: tiles` 或 `list`。MC、NKU 的配色、布局和品牌素材保存在各自 theme/ 内，共同页面骨架在 shared/。上游来源与素材权利见第三方声明。
 
 ## 仓库结构
 
@@ -83,11 +83,14 @@ research-ppt/
   package.json / package-lock.json
   config/vite.ts               共用静态资源配置
   scripts/                     四个内部文件：工作流、浏览器、渲染、结构检查
-  decks/demo/                  官方源稿、Counter 及 v1.0.0 的 PDF/PPTX
-  templates/                   TemplateMC、TemplateNKU、共享骨架及示例
+  decks/
+    demo/                      官方源稿、Counter 及 PDF/PPTX
+    mc/                        slides.md、assets/、theme/、exports/
+    nku/                       slides.md、assets/、theme/、exports/
+  shared/                      MC、NKU 共用的页面骨架和基础样式
 ```
 
-官方 demo、两套内置主题及其已审阅素材和示例成品纳入 Git；自己的 deck、自行增加的主题、素材（public/）、参考材料（根 references/）和其他成品默认忽略，按需创建。每套演示直接使用自己的 slides.md，工程根目录没有重复源稿。依赖通过 npm 安装，本机 Skills 不随仓库分发。
+官方 demo、两套内置主题及其已审阅素材和示例成品纳入 Git；自己的 deck、素材（public/）、参考材料（根 references/）和其他成品默认忽略，按需创建。每套演示直接使用自己的 slides.md，工程根目录没有重复源稿。依赖通过 npm 安装，本机 Skills 不随仓库分发。
 
 [创作流程与 AI 提示词](docs/WORKFLOW.md) · [维护与验证](docs/MAINTAINING.md)
 

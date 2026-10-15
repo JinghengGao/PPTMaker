@@ -22,10 +22,7 @@ function Assert-WithinDirectory([string]$Path, [string]$Directory) {
 
 function Get-DeckDirectory([string]$DeckId, [switch]$MustExist) {
   Assert-WorkspaceId $DeckId
-  # Built-in examples stay with their theme; avoid a second copy in decks/.
-  if ($DeckId -in @('template-mc','template-nku')) {
-    $path = Join-Path $script:EngineDirectory "templates/$DeckId/examples"
-  } else { $path = Join-Path $script:EngineDirectory "decks/$DeckId" }
+  $path = Join-Path $script:EngineDirectory "decks/$DeckId"
   Assert-WithinDirectory $path $script:EngineDirectory
   if ($MustExist -and -not (Test-Path -LiteralPath (Join-Path $path 'slides.md') -PathType Leaf)) { throw "Deck source missing: $path" }
   return $path
@@ -98,7 +95,7 @@ function New-WorkspaceDeck {
   $assets = Join-Path $script:EngineDirectory "public/decks/$DeckId"
   Assert-WithinDirectory $assets $script:EngineDirectory
   if ((Test-Path -LiteralPath $deck) -or (Test-Path -LiteralPath $assets)) { throw 'Deck or assets already exist. Nothing was replaced.' }
-  $aliases = @{ TemplateMC = 'template-mc'; TemplateNKU = 'template-nku' }
+  $aliases = @{ TemplateMC = 'mc'; TemplateNKU = 'nku' }
   if ($aliases.ContainsKey($Theme)) { $Theme = $aliases[$Theme] }
   Assert-WorkspaceId $Theme
   $themeValue = 'default'
@@ -109,19 +106,19 @@ function New-WorkspaceDeck {
   $themeVersion = $enginePackage.dependencies.'@slidev/theme-default'
   $config = [ordered]@{ theme = 'default'; themeVersion = $themeVersion }
   if ($Theme -ne 'default') {
-    $themeDirectory = Join-Path $script:EngineDirectory "templates/$Theme"
-    Assert-WithinDirectory $themeDirectory $script:EngineDirectory
-    foreach ($name in @('package.json','manifest.json','STYLE-GUIDE.md')) {
-      if (-not (Test-Path -LiteralPath (Join-Path $themeDirectory $name) -PathType Leaf)) { throw "Local theme is incomplete: $Theme/$name" }
+    $sourceDirectory = Join-Path $script:EngineDirectory "decks/$Theme"
+    Assert-WithinDirectory $sourceDirectory $script:EngineDirectory
+    foreach ($name in @('theme/package.json','manifest.json','STYLE-GUIDE.md')) {
+      if (-not (Test-Path -LiteralPath (Join-Path $sourceDirectory $name) -PathType Leaf)) { throw "Local theme is incomplete: $Theme/$name" }
     }
-    $manifest = Get-Content -LiteralPath (Join-Path $themeDirectory 'manifest.json') -Encoding UTF8 -Raw | ConvertFrom-Json
+    $manifest = Get-Content -LiteralPath (Join-Path $sourceDirectory 'manifest.json') -Encoding UTF8 -Raw | ConvertFrom-Json
     if ($manifest.id -ne $Theme -or -not $manifest.version) { throw 'Invalid local theme manifest.' }
-    $themeValue = "../../templates/$Theme"
+    $themeValue = "../$Theme/theme"
     $themeVersion = $manifest.version
     $config = [ordered]@{ themeId = $Theme; themeVersion = $manifest.version }
     if ($manifest.starter) {
-      $starter = [IO.Path]::GetFullPath((Join-Path $themeDirectory $manifest.starter))
-      Assert-WithinDirectory $starter $themeDirectory
+      $starter = [IO.Path]::GetFullPath((Join-Path $sourceDirectory $manifest.starter))
+      Assert-WithinDirectory $starter $sourceDirectory
       if (-not (Test-Path -LiteralPath $starter -PathType Leaf)) { throw "Theme starter missing: $starter" }
     }
   }

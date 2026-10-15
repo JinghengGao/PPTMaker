@@ -15,11 +15,13 @@ scripts/ 只保留四个运行所需文件，日常通过根入口调用，不�
 
 成品检查属于制作演示的通用能力；截图和报告在临时目录中生成，用完删除。开发者的回归测试脚本、固定本仓库文件及哈希的提交审查脚本不随工作区分发。
 
-共用 config/vite.ts 指向 public/，禁止构建时复制整个私人素材目录。文件服务仅允许 research-ppt 引擎范围，供主题示例读取 node_modules 内公式字体。两套主题及 New 创建的 deck 通过一行配置转接复用它；官方 demo 不需要额外配置。保留 research-ppt 引擎边界，避免改变本地既有作品的相对路径。
+共用 config/vite.ts 指向 public/，禁止构建时复制整个私人素材目录。文件服务仅允许 research-ppt 引擎范围，供主题示例读取 node_modules 内公式字体。mc、nku 及 New 创建的 deck 通过一行配置转接复用它；官方 demo 不需要额外配置。保留 research-ppt 引擎边界，避免改变本地既有作品的相对路径。
 
-Get-DeckDirectory 统一解析三套内置示例与用户 deck：demo 指向 decks/demo；template-mc、template-nku 指向各主题 examples/。成品检查从主题 manifest 识别示例 ID。不要为直接预览再复制一份示例源稿。
+demo、mc、nku 在 decks/ 下并列保存，Get-DeckDirectory 对所有作品统一解析 decks/<id>，导出检查直接采用目录名作为 ID。mc、nku 的 manifest.json、STYLE-GUIDE.md 与 slides.md 位于作品根目录，布局、配色和 NKU 校园素材位于各自 theme/；不保留额外示例层或顶层主题目录。
 
-TemplateMC 与 TemplateNKU 通过各自的 layouts/ 转接 templates/_shared/Frame.vue 与基础样式；主题颜色和 NKU 校园素材只在对应主题内声明。共享骨架修改时回归两套主题，原版 demo 的源码和成品哈希应保持不变。每套主题包含来源提交、参考 PDF 指纹、逐页布局依据和八页示例；示例成品只保留 v1.0.0 的 PDF/PPTX。
+New 默认使用官方 Starter 和 default 主题；选择 mc、nku 时从相应 manifest.starter 复制源稿及其 assets/，使用 ../<id>/theme 引用原示例的样式。starter 限制在所选示例内部，其他含完整 theme/ 的作品也能作为来源。更新内置样式需回归相关作品。
+
+MC、NKU 的 theme/layouts/ 转接 shared/Frame.vue 与基础样式。共享骨架修改时回归两套示例，原版 demo 的源码和成品哈希应保持不变。各示例保留来源提交、参考 PDF 指纹、布局依据和 v1.0.0 的 PDF/PPTX。
 
 Render.ps1 是独立进程入口，不要在交互会话中直接执行或点导入。PDF 分支在全部页面和检查记录写入成功后退出，避免 WinRT 清理阶段阻塞；失败仍返回错误。日常使用根入口 Check。
 
@@ -29,7 +31,7 @@ Export 先取得 deck 根 .export.lock，在 .export-work 准备并检查新成�
 
 Check 使用同一个锁，避免检查期间导出替换成品。暂存检查通过前，将 Slidev 的临时 localhost/print 页码链接转换为 PPTX 内部跳转；真实外部网址保持不变。没有原生文本对象的 PPTX 不通过可编辑文本检查。
 
-export.config.json 可记录 theme、themeVersion；本地主题使用 themeId。可选 editablePostprocessor 指向 deck 内 Python 脚本，接收目标 PPTX 与 --report 参数。私人修复逻辑和依赖保持在对应 deck，不进入通用引擎。
+export.config.json 可记录 theme、themeVersion；本地样式使用来源示例的 themeId。可选 editablePostprocessor 指向 deck 内 Python 脚本，接收目标 PPTX 与 --report 参数。私人修复逻辑和依赖保持在对应 deck，不进入通用引擎。
 
 ## 检查与提交
 
@@ -49,7 +51,7 @@ git diff --cached
 
 正式发布前运行 `npm.cmd --prefix research-ppt audit --audit-level=high`，审阅完整依赖报告并解决影响发布的漏洞。不要自动执行 audit fix --force 或更换锁定版本；依赖调整后重新验证导出。项目许可证及模板、照片和校园素材的分发授权必须明确后，才能宣称完成开源授权。
 
-依赖版本固定，不顺带升级。用户 deck、主题、资料和其他成品默认忽略；Git 忽略不是备份，重要材料需自行保存。
+依赖版本固定，不顺带升级。用户 deck、资料和其他成品默认忽略；Git 忽略不是备份，重要材料需自行保存。
 
 共享代码修改后验证 New、Preview、Export、Check；演示内容变动须逐页观察。测试与渲染使用临时目录，不提交截图、报告、依赖和机器配置。官方 demo 的来源在根第三方声明中，其 slides.md 应与安装包 @slidev/cli/template.md 内容一致，Counter.vue 来自同一版本的官方脚手架。
 

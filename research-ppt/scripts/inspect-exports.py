@@ -121,9 +121,6 @@ def main():
         parser.error('Version must be X.Y.Z')
     deck = args.deck.resolve()
     deck_id = deck.name
-    manifest = deck.parent / 'manifest.json'
-    if deck.name == 'examples' and manifest.is_file():
-        deck_id = json.loads(manifest.read_text(encoding='utf-8-sig'))['id']
     if not re.fullmatch(r'[a-z0-9]+(?:-[a-z0-9]+)*', deck_id):
         parser.error('Invalid deck ID')
     folder = args.directory or deck / f'exports/v{args.version}'
