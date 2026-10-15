@@ -79,10 +79,10 @@ foreach ($path in $selected) {
 Write-Output "Generated-file cleanup: $($files.Count) files, $([Math]::Round($bytes/1GB,2)) GiB."
 foreach ($path in $selected) { Write-Output ('  '+$path.Substring($root.Length+1)) }
 if (-not $Apply) { Write-Output 'Preview only. Re-run with -Apply to delete this scope. Keep all versioned PDFs/editable PPTXs and current source materials.'; return }
-$active=Get-CimInstance Win32_Process -Filter "Name='node.exe'" | Where-Object {
-  $_.CommandLine -and $_.CommandLine.Replace('\','/').Contains($script:EngineDirectory.Replace('\','/')) -and $_.CommandLine -match 'slidev'
+$blockers=@(Get-CleanupBlockers $script:EngineDirectory @(Get-CimInstance Win32_Process -Filter "Name='node.exe'"))
+if ($blockers.Count) {
+  throw ("Cleanup blocked before deleting any files:`n  "+($blockers -join "`n  ")+"`nStop the listed processes. For a deck-root lock, confirm its export has stopped before removing that lock.")
 }
-if ($active -or (Get-ChildItem -LiteralPath (Join-Path $script:EngineDirectory 'decks') -Filter '.export.lock' -Recurse -Force)) { throw 'Stop Slidev/export processes and resolve export locks before cleanup.' }
 # File-by-file deletion; only empty directories are removed, never recursive deletion.
 foreach ($file in $files) {
   $absolute=[IO.Path]::GetFullPath($file.FullName)

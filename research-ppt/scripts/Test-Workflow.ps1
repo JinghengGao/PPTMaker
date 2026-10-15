@@ -104,5 +104,24 @@ Assert-True (-not (Test-Path -LiteralPath (Join-Path $deck '.export-work'))) 'Te
 & $cli -Action Clean | Out-Null
 Assert-True ((Get-FileHash -LiteralPath $sentinel).Hash -eq $sentinelHash) 'Read-only cleanup preview deleted output'
 $results.Add(@{test='cleanup defaults to read-only preview';status='passed'})
+$archivedLock=Join-Path $deck 'archive/workflow/test-fixtures/.export.lock'
+New-Item -ItemType Directory -Path (Split-Path -Parent $archivedLock) -Force | Out-Null
+Set-Content -LiteralPath $archivedLock -Value 'historical test lock'
+Assert-True (@(Get-CleanupBlockers $engine @()).Count -eq 0) 'Archived fixture lock blocked cleanup'
+Assert-True (Test-Path -LiteralPath $archivedLock) 'Lock inspection modified archived files'
+$results.Add(@{test='cleanup ignores archived fixture locks without modifying files';status='passed'})
+$processes=@(
+  [pscustomobject]@{ProcessId=101;CommandLine=('node "'+$engine.ToUpperInvariant().Replace('\','/')+'/node_modules/@slidev/cli/bin/slidev.mjs"')},
+  [pscustomobject]@{ProcessId=102;CommandLine=('node "'+$engine+'-other/node_modules/@slidev/cli/bin/slidev.mjs"')},
+  [pscustomobject]@{ProcessId=103;CommandLine=('node "'+$engine+'/scripts/unrelated.mjs"')},
+  [pscustomobject]@{ProcessId=104;CommandLine=$null}
+)
+$blockers=@(Get-CleanupBlockers $engine $processes)
+Assert-True ($blockers.Count -eq 1 -and $blockers[0].Contains('PID=101')) 'Process guard must identify only this workspace Slidev process'
+$results.Add(@{test='cleanup identifies running Slidev and ignores unrelated processes';status='passed'})
+Set-Content -LiteralPath $lock -Value 'test root lock'
+Expect-Failure 'cleanup reports deck-root lock before deleting files' { & $cli -Action Clean -Apply } ([regex]::Escape($lock))
+Assert-True ((Get-FileHash -LiteralPath $sentinel).Hash -eq $sentinelHash) 'Blocked cleanup deleted output'
+Assert-True (Test-Path -LiteralPath $lock) 'Blocked cleanup removed a foreign lock'
 Write-Output "Passed $($results.Count) workflow checks. Temporary fixtures are removed."
 } finally { Remove-GeneratedPath $testRoot $tempParent }
