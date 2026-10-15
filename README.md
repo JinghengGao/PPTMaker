@@ -39,6 +39,20 @@ Deck ID 使用小写字母、数字及连字符；版本使用 X.Y.Z。成品位
 
 Check 检查成品结构并渲染 PDF；安装 PowerPoint 时还会原生渲染 PPTX。可加 `-RequirePowerPoint` 要求原生检查，或 `-PreviewUrl http://localhost:3030` 检查正在预览的全部页面。人工仍需打开最终文件逐页复核；公式、SVG 和复杂效果可能是图片，不保证所有对象可编辑。
 
+## 内置通用主题
+
+| 主题 | 特征 | 使用说明与八页示例 |
+| --- | --- | --- |
+| TemplateMC | 蓝色标题区、三段页脚、三线表与公式框 | [主题说明](research-ppt/templates/template-mc/STYLE-GUIDE.md) · [PDF](research-ppt/templates/template-mc/examples/exports/v1.0.0/template-mc-v1.0.0.pdf) · [PPTX](research-ppt/templates/template-mc/examples/exports/v1.0.0/template-mc-v1.0.0-editable.pptx) |
+| TemplateNKU | 南开紫、原版校徽与建筑插图、可高亮目录 | [主题说明](research-ppt/templates/template-nku/STYLE-GUIDE.md) · [PDF](research-ppt/templates/template-nku/examples/exports/v1.0.0/template-nku-v1.0.0.pdf) · [PPTX](research-ppt/templates/template-nku/examples/exports/v1.0.0/template-nku-v1.0.0-editable.pptx) |
+
+```powershell
+.\PPTMaker.ps1 -Action New -DeckId mc-talk -Theme TemplateMC
+.\PPTMaker.ps1 -Action New -DeckId nku-talk -Theme TemplateNKU
+```
+
+New 会复制对应主题的示例与所需图片。普通页面用 `heading` 设置顶部标题；目录用 `agenda` 数组和 `active` 设置当前条目。NKU 支持 `agendaStyle: tiles` 或 `list`。配色、页脚、布局与封面素材互相隔离；共同页面骨架保存在 templates/_shared。上游来源与素材权利见第三方声明。
+
 ## 仓库结构
 
 ```text
@@ -50,9 +64,10 @@ research-ppt/
   config/vite.ts               共用静态资源配置
   scripts/                     新建、导出、检查及回归测试
   decks/demo/                  官方源稿、Counter 及 v1.0.0 的 PDF/PPTX
+  templates/                   TemplateMC、TemplateNKU、共享骨架及示例
 ```
 
-demo 源码及上述两份成品纳入 Git；自己的 deck、本地主题（templates/）、素材（public/）、参考材料（根 references/）和其他成品默认忽略，按需创建。每套演示直接使用自己的 slides.md，工程根目录没有重复源稿。依赖通过 npm 安装，本机 Skills 不随仓库分发。
+官方 demo、两套内置主题及其已审阅素材和示例成品纳入 Git；自己的 deck、自行增加的主题、素材（public/）、参考材料（根 references/）和其他成品默认忽略，按需创建。每套演示直接使用自己的 slides.md，工程根目录没有重复源稿。依赖通过 npm 安装，本机 Skills 不随仓库分发。
 
 [创作流程与 AI 提示词](docs/WORKFLOW.md) · [维护与验证](docs/MAINTAINING.md)
 

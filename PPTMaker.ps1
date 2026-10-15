@@ -17,7 +17,7 @@ $ErrorActionPreference = 'Stop'
 if ($Action -eq 'Help') {
   Write-Output @'
 PPTMaker -Action Doctor
-PPTMaker -Action New -DeckId my-talk [-Theme default|local-theme-id]
+PPTMaker -Action New -DeckId my-talk [-Theme default|TemplateMC|TemplateNKU|local-theme-id]
 PPTMaker -Action Preview -DeckId demo [-Port 3030]
 PPTMaker -Action Export -DeckId demo -Version 1.0.0
 PPTMaker -Action Check -DeckId demo -Version 1.0.0 [-PreviewUrl http://localhost:3030] [-RequirePowerPoint] [-AllowKnownToolchainIssues]

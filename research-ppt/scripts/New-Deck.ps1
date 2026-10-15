@@ -9,8 +9,11 @@ $deck = Get-DeckDirectory $DeckId
 $assets = Join-Path $script:EngineDirectory "public/decks/$DeckId"
 Assert-WithinDirectory $assets $script:EngineDirectory
 if ((Test-Path -LiteralPath $deck) -or (Test-Path -LiteralPath $assets)) { throw 'Deck or assets already exist. Nothing was replaced.' }
+$aliases = @{ TemplateMC = 'template-mc'; TemplateNKU = 'template-nku' }
+if ($aliases.ContainsKey($Theme)) { $Theme = $aliases[$Theme] }
 Assert-WorkspaceId $Theme
 $themeValue = 'default'
+$starter = Join-Path $script:EngineDirectory 'decks/demo/slides.md'
 # PowerShell 5.1 cannot parse package-lock's empty-string package key.
 # package.json pins the same exact versions, and has no empty property names.
 $enginePackage = Get-Content -LiteralPath (Join-Path $script:EngineDirectory 'package.json') -Raw -Encoding UTF8 | ConvertFrom-Json
@@ -27,6 +30,11 @@ if ($Theme -ne 'default') {
   $themeValue = "../../templates/$Theme"
   $themeVersion = $manifest.version
   $config = [ordered]@{ themeId = $Theme; themeVersion = $manifest.version }
+  if ($manifest.starter) {
+    $starter = [IO.Path]::GetFullPath((Join-Path $themeDirectory $manifest.starter))
+    Assert-WithinDirectory $starter $themeDirectory
+    if (-not (Test-Path -LiteralPath $starter -PathType Leaf)) { throw "Theme starter missing: $starter" }
+  }
 }
 # CreateNew on the marker prevents two creators from overwriting each other.
 New-Item -ItemType Directory -Path (Split-Path -Parent $deck) -Force | Out-Null
@@ -35,9 +43,9 @@ $creationLock = [IO.File]::Open($marker, [IO.FileMode]::CreateNew, [IO.FileAcces
 try {
   if ((Test-Path -LiteralPath $deck) -or (Test-Path -LiteralPath $assets)) { throw 'Deck or assets appeared during creation.' }
   foreach ($path in @($deck,$assets,(Join-Path $deck 'exports'))) { New-Item -ItemType Directory -Path $path | Out-Null }
-  $source = Get-Content -LiteralPath (Join-Path $script:EngineDirectory 'decks/demo/slides.md') -Raw -Encoding UTF8
+  $source = Get-Content -LiteralPath $starter -Raw -Encoding UTF8
   # Only change the frontmatter theme; keep theme examples in the official demo intact.
-  $source = ([regex]'(?m)^theme: seriph\r?$').Replace($source, "theme: $themeValue", 1)
+  $source = ([regex]'(?m)^theme:[ \t]*[^\r\n]+').Replace($source, "theme: $themeValue", 1)
   $utf8 = New-Object Text.UTF8Encoding($false)
   [IO.File]::WriteAllText((Join-Path $deck 'slides.md'), $source, $utf8)
   [IO.File]::WriteAllText((Join-Path $deck 'vite.config.ts'), "export { default } from '../../config/vite.ts'`n", $utf8)
@@ -63,6 +71,12 @@ try {
 - [ ] Record commands, results and remaining issues below.
 '@
   [IO.File]::WriteAllText((Join-Path $deck 'QA.md'), $qa, $utf8)
-  Copy-Item -LiteralPath (Join-Path $script:EngineDirectory 'decks/demo/components') -Destination $deck -Recurse
+  foreach ($name in @('components','assets')) {
+    $support = Join-Path (Split-Path -Parent $starter) $name
+    if (Test-Path -LiteralPath $support -PathType Container) {
+      Assert-WithinDirectory $support (Split-Path -Parent $starter)
+      Copy-Item -LiteralPath $support -Destination $deck -Recurse
+    }
+  }
 } finally { $creationLock.Dispose(); Remove-Item -LiteralPath $marker }
 Write-Output "Created $deck (theme: $Theme). Edit brief.md, slides.md and QA.md."

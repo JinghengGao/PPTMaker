@@ -21,6 +21,14 @@ foreach ($name in @('decks/demo')) {
   }
 }
 Copy-Item -LiteralPath (Join-Path $root 'research-ppt/decks/demo/components') -Destination (Join-Path $engine 'decks/demo') -Recurse
+foreach ($name in @('_shared','template-mc','template-nku')) {
+  $themeSource=Join-Path $root "research-ppt/templates/$name"
+  foreach ($file in Get-ChildItem -LiteralPath $themeSource -Recurse -File | Where-Object { $_.FullName -notmatch '[\\/](exports|node_modules|screenshots)[\\/]' }) {
+    $destination=Join-Path $engine ("templates/$name/"+$file.FullName.Substring($themeSource.Length+1))
+    New-Item -ItemType Directory -Path (Split-Path -Parent $destination) -Force | Out-Null
+    Copy-Item -LiteralPath $file.FullName -Destination $destination
+  }
+}
 foreach ($name in @('PPTMaker.ps1')) { Copy-Item -LiteralPath (Join-Path $root $name) -Destination $testRoot }
 foreach ($name in @('package.json','package-lock.json')) { Copy-Item -LiteralPath (Join-Path $root "research-ppt/$name") -Destination $engine }
 $results=New-Object Collections.Generic.List[object]
@@ -46,6 +54,22 @@ $counter=Join-Path $engine 'decks/test-talk/components/Counter.vue'
 Assert-True ((Get-FileHash -LiteralPath $counter).Hash -eq (Get-FileHash -LiteralPath (Join-Path $engine 'decks/demo/components/Counter.vue')).Hash) 'New must copy the official demo component'
 Assert-True (@(Get-ChildItem -LiteralPath (Join-Path $engine 'public/decks/test-talk') -Force).Count -eq 0) 'New must not add unused sample assets'
 $results.Add(@{test='official starter dependencies copied and only frontmatter theme changed';status='passed'})
+foreach ($spec in @(@('TemplateMC','template-mc'),@('TemplateNKU','template-nku'))) {
+  & $cli -Action New -DeckId $spec[1] -Theme $spec[0] | Out-Null
+  $themedDeck=Join-Path $engine ('decks/'+$spec[1])
+  $themedSource=Get-Content -LiteralPath (Join-Path $themedDeck 'slides.md') -Raw -Encoding UTF8
+  $themedConfig=Get-Content -LiteralPath (Join-Path $themedDeck 'export.config.json') -Raw | ConvertFrom-Json
+  Assert-True ($themedSource.Contains("theme: ../../templates/$($spec[1])") -and $themedSource.Contains('heading:') -and -not $themedSource.Contains('Welcome to Slidev')) 'Local theme must use its own starter and resolve its path'
+  Assert-True ($themedConfig.themeId -eq $spec[1] -and $themedConfig.themeVersion -eq '1.0.0') 'Local theme version must be recorded'
+  Assert-True (Test-Path -LiteralPath (Join-Path $themedDeck 'assets/example.jpg')) 'Local starter image was not copied'
+  Assert-True (-not (Test-Path -LiteralPath (Join-Path $themedDeck 'components/Counter.vue'))) 'Local theme must not copy unrelated official Counter'
+  $results.Add(@{test="$($spec[0]) alias creates independent themed starter and assets";status='passed'})
+}
+& $cli -Action New -DeckId lower-case-theme -Theme template-mc | Out-Null
+$results.Add(@{test='lowercase local theme ID remains supported';status='passed'})
+Set-Content -LiteralPath (Join-Path $engine 'templates/template-mc/manifest.json') -Value '{"id":"template-mc","version":"1.0.0","starter":"../../package.json"}' -Encoding UTF8
+Expect-Failure 'theme starter traversal rejected before creation' { & $cli -Action New -DeckId invalid-starter -Theme TemplateMC } 'Path escapes'
+Assert-True (-not (Test-Path -LiteralPath (Join-Path $engine 'decks/invalid-starter'))) 'Invalid starter created a directory'
 Expect-Failure 'duplicate deck does not overwrite' { & $cli -Action New -DeckId test-talk } 'already exist'
 Assert-True ((Get-FileHash -LiteralPath $source).Hash -eq $hash) 'Duplicate creation modified source'
 Expect-Failure 'path traversal rejected' { & $cli -Action New -DeckId '../escape' } 'pattern|ID must'

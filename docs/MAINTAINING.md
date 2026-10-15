@@ -7,7 +7,7 @@
 | 文件 | 职责 |
 | --- | --- |
 | Workspace.ps1 | deck ID、路径边界、配置读取与临时目录清理 |
-| New-Deck.ps1 | 从官方示例创建 deck、任务书与 QA，不覆盖已有目录 |
+| New-Deck.ps1 | 从官方示例或主题自带 starter 创建 deck、任务书与 QA，不覆盖已有目录 |
 | Doctor.ps1 / doctor.mjs | Node、npm、Python、Git、Slidev、Chromium 和可选 PowerPoint |
 | Export-Deck.ps1 | PDF 与可编辑 PPTX、并发锁、暂存检查和失败回滚 |
 | Test-Exports.ps1 | 成品结构、原生渲染及可选浏览器检查，结束后删除临时文件 |
@@ -18,6 +18,10 @@
 | check-public-repo.py | Git 索引中的公开路径、敏感内容与文档链接 |
 
 共用 config/vite.ts 指向 public/，禁止构建时复制整个私人素材目录。New 为每个新 deck 写入配置转接文件；官方 demo 不需要额外配置。保留 research-ppt 引擎边界，避免改变本地既有作品的相对路径。
+
+TemplateMC 与 TemplateNKU 通过各自的 layouts/ 转接 templates/_shared/Frame.vue 与基础样式；主题颜色和 NKU 校园素材只在对应主题内声明。共享骨架修改时回归两套主题，原版 demo 的源码和成品哈希应保持不变。每套主题包含来源提交、参考 PDF 指纹、逐页布局依据和八页示例；示例成品只保留 v1.0.0 的 PDF/PPTX。
+
+Render-Pdf 的 ExitAfterRendering 仅供独立子进程使用：全部页面及检查记录写入成功后退出，避免本机 WinRT 清理阶段阻塞。不要在交互会话中直接调用该开关；日常使用根入口 Check。
 
 ## 导出事务
 
@@ -36,7 +40,7 @@ python -B research-ppt/scripts/check-public-repo.py
 git diff --cached --stat
 ```
 
-公开检查读取 Git 索引；先审阅完整跟踪清单，再提交。官方 demo 的源码与 v1.0.0 两份成品纳入 Git，检查器固定这对成品的路径与已审阅 SHA256。重新导出或更换公开版本时，先逐页审阅，再同步更新 .gitignore、PUBLIC_EXPORTS 和 README 链接；其余二进制文件仍会被检查器拒绝。
+公开检查读取 Git 索引；先审阅完整跟踪清单，再提交。官方 demo、内置主题源码及其公开素材和示例成品纳入 Git，检查器固定公开二进制文件的路径与已审阅 SHA256。重新导出或更换公开版本时，先逐页审阅，再同步更新 .gitignore、PUBLIC_BINARIES 和 README 链接；其余二进制文件仍会被检查器拒绝。原始参考 PDF 保持本地，不强制暂存。
 
 依赖版本固定，不顺带升级。用户 deck、主题、资料和其他成品默认忽略；Git 忽略不是备份，重要材料需自行保存。
 

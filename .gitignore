@@ -1,4 +1,4 @@
-# Ignore local research and generated files; publish only the reviewed demo pair.
+# Ignore local research and generated files; publish reviewed examples only.
 /_local/
 /Relevant Materials/
 **/node_modules/
@@ -28,7 +28,22 @@
 /research-ppt/decks/demo/exports/v1.0.0/*
 !/research-ppt/decks/demo/exports/v1.0.0/demo-v1.0.0.pdf
 !/research-ppt/decks/demo/exports/v1.0.0/demo-v1.0.0-editable.pptx
-/research-ppt/templates/
+/research-ppt/templates/*
+!/research-ppt/templates/_shared/
+!/research-ppt/templates/template-mc/
+!/research-ppt/templates/template-nku/
 /research-ppt/public/
 /research-ppt/skills-lock.json
 /research-ppt/slides-export.*
+!/research-ppt/templates/template-mc/examples/exports/
+/research-ppt/templates/template-mc/examples/exports/*
+!/research-ppt/templates/template-mc/examples/exports/v1.0.0/
+/research-ppt/templates/template-mc/examples/exports/v1.0.0/*
+!/research-ppt/templates/template-mc/examples/exports/v1.0.0/template-mc-v1.0.0.pdf
+!/research-ppt/templates/template-mc/examples/exports/v1.0.0/template-mc-v1.0.0-editable.pptx
+!/research-ppt/templates/template-nku/examples/exports/
+/research-ppt/templates/template-nku/examples/exports/*
+!/research-ppt/templates/template-nku/examples/exports/v1.0.0/
+/research-ppt/templates/template-nku/examples/exports/v1.0.0/*
+!/research-ppt/templates/template-nku/examples/exports/v1.0.0/template-nku-v1.0.0.pdf
+!/research-ppt/templates/template-nku/examples/exports/v1.0.0/template-nku-v1.0.0-editable.pptx

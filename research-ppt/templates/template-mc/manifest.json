@@ -1,0 +1,40 @@
+{
+  "id": "template-mc",
+  "name": "TemplateMC",
+  "version": "1.0.0",
+  "source_reference": {
+    "file": "TemplateMC__Copy_.pdf",
+    "sha256": "c562c38aabfeddb1b34707c6e0481b0f02a09e7b0cc560eb432be254e5289d55",
+    "pages": 14,
+    "repository": "https://github.com/GrokCV/TemplateMC",
+    "commit": "cb087ed5f4d65719826d3b883718d05c43fa6019"
+  },
+  "status": "validated",
+  "use_cases": [
+    "科研汇报",
+    "课程展示",
+    "通用技术演示"
+  ],
+  "last_validated": "2026-10-15",
+  "starter": "examples/slides.md",
+  "dependencies": [
+    "../_shared"
+  ],
+  "license_status": "Upstream contains no LICENSE; retain attribution and asset rights. Project license remains undecided.",
+  "assets": [
+    {
+      "path": "examples/assets/example.jpg",
+      "sha256": "8e9ab135da7eacabdeeeee11ba4b7bcdd1bfac128cf92a9de9c79f984060ae1e",
+      "source": "image/demo.jpg"
+    }
+  ],
+  "validation": {
+    "slides": 8,
+    "native_text_objects": 90,
+    "pdf_visual_review": "all pages passed",
+    "powerpoint_native_render": "all pages passed",
+    "browser_qa": "passed with explicitly allowed known FloatingVue/Popper toolchain issue",
+    "editable_scope": "Native text and shapes; formulas and some complex elements are images.",
+    "clean_checkout": "npm ci, Doctor, New, preview QA, Export and Check -RequirePowerPoint passed on Windows"
+  }
+}

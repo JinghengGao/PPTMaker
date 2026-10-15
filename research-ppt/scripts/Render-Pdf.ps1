@@ -1,4 +1,4 @@
-param([Parameter(Mandatory=$true)][string]$InputFile,[Parameter(Mandatory=$true)][string]$OutputDirectory,[int]$Width=1600)
+param([Parameter(Mandatory=$true)][string]$InputFile,[Parameter(Mandatory=$true)][string]$OutputDirectory,[int]$Width=1600,[switch]$ExitAfterRendering)
 $ErrorActionPreference='Stop'
 Add-Type -AssemblyName System.Runtime.WindowsRuntime
 [Windows.Storage.StorageFile,Windows.Storage,ContentType=WindowsRuntime] | Out-Null
@@ -29,3 +29,6 @@ for($i=0;$i -lt $pdf.PageCount;$i++){
   $page.Dispose();Write-Output ('Rendered PDF page {0}/{1}' -f ($i+1),$pdf.PageCount)
 }
 @{renderer='Windows.Data.Pdf';input=$source;page_count=$pdf.PageCount;pages=$records} | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath (Join-Path $OutputDirectory 'pdf-inspection.json') -Encoding UTF8
+# Standalone worker only: some WinRT PDF finalizers stall PowerShell shutdown.
+# Exit only after every page and the complete inspection record are written.
+if ($ExitAfterRendering) { [Console]::Out.Flush(); [Environment]::Exit(0) }

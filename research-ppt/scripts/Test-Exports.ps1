@@ -23,7 +23,7 @@ try {
   if ($LASTEXITCODE -ne 0) { throw 'Deliverable integrity check failed' }
   $audit=Get-Content -LiteralPath (Join-Path $work 'deliverables.json') -Raw -Encoding UTF8 | ConvertFrom-Json
   $stem=Join-Path $exports "$DeckId-v$Version"
-  & powershell.exe -NoProfile -File (Join-Path $PSScriptRoot 'Render-Pdf.ps1') -InputFile ($stem+'.pdf') -OutputDirectory (Join-Path $work 'pdf') -Width 1600
+  & powershell.exe -NoProfile -File (Join-Path $PSScriptRoot 'Render-Pdf.ps1') -InputFile ($stem+'.pdf') -OutputDirectory (Join-Path $work 'pdf') -Width 1600 -ExitAfterRendering
   if ($LASTEXITCODE -ne 0) { throw 'Native PDF rendering failed' }
   $pdf=Get-Content -LiteralPath (Join-Path $work 'pdf/pdf-inspection.json') -Raw -Encoding UTF8 | ConvertFrom-Json
   if ($pdf.page_count -ne $audit.slides -or @(Get-ChildItem -LiteralPath (Join-Path $work 'pdf') -Filter 'slide-*.png').Count -ne $audit.slides) { throw 'PDF page count differs or rendering is incomplete' }

@@ -9,6 +9,8 @@
 
 每版保留 PDF 与可编辑 PPTX。同版重导成功后替换，其他版本保留；不积累截图、日志、输入快照和重导归档。
 
+内置主题可用 TemplateMC、TemplateNKU（或 template-mc、template-nku）选择，默认仍为官方 default。New 优先读取本地主题 manifest.json 的 starter，复制对应示例的 assets/ 与 components/；没有 starter 时采用官方示例。starter 必须位于该主题内部，不能跳出目录。
+
 ## 从参考创建本地主题
 
 参考资料按需放入根 references/，原件只读。归档时复制到独立目录；逐页渲染观察，记录字号、配色、网格、标题与图表的页码依据，未知属性写待确认。
