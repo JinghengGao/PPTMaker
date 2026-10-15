@@ -25,11 +25,11 @@ Use powershell.exe -NoProfile -File .\PPTMaker.ps1 before these arguments. See R
 '@
   return
 }
-if ($Action -eq 'Doctor') { & (Join-Path $PSScriptRoot 'research-ppt/scripts/Doctor.ps1'); return }
+if ($Action -eq 'Doctor') { Test-WorkspaceEnvironment; return }
 if (-not $DeckId) { throw '-DeckId is required for this action.' }
 if ($Action -in @('Export','Check') -and -not $Version) { throw '-Version X.Y.Z is required for this action.' }
 switch ($Action) {
-  'New' { & (Join-Path $PSScriptRoot 'research-ppt/scripts/New-Deck.ps1') -DeckId $DeckId -Theme $Theme }
+  'New' { New-WorkspaceDeck -DeckId $DeckId -Theme $Theme }
   'Preview' {
     $deck = Get-DeckDirectory $DeckId -MustExist
     Assert-EngineDependencies
@@ -39,6 +39,6 @@ switch ($Action) {
       if ($LASTEXITCODE -ne 0) { throw 'Preview failed.' }
     } finally { Pop-Location }
   }
-  'Export' { & (Join-Path $PSScriptRoot 'research-ppt/scripts/Export-Deck.ps1') -DeckId $DeckId -Version $Version }
-  'Check' { & (Join-Path $PSScriptRoot 'research-ppt/scripts/Test-Exports.ps1') -DeckId $DeckId -Version $Version -PreviewUrl $PreviewUrl -RequirePowerPoint:$RequirePowerPoint -AllowKnownToolchainIssues:$AllowKnownToolchainIssues }
+  'Export' { Export-WorkspaceDeck -DeckId $DeckId -Version $Version }
+  'Check' { Test-WorkspaceDeck -DeckId $DeckId -Version $Version -PreviewUrl $PreviewUrl -RequirePowerPoint:$RequirePowerPoint -AllowKnownToolchainIssues:$AllowKnownToolchainIssues }
 }

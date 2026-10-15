@@ -62,7 +62,7 @@ docs/                          创作流程与维护说明
 research-ppt/
   package.json / package-lock.json
   config/vite.ts               共用静态资源配置
-  scripts/                     新建、导出、检查及回归测试
+  scripts/                     四个内部文件：工作流、浏览器、渲染、结构检查
   decks/demo/                  官方源稿、Counter 及 v1.0.0 的 PDF/PPTX
   templates/                   TemplateMC、TemplateNKU、共享骨架及示例
 ```

@@ -5,9 +5,7 @@
   "scripts": {
     "dev": "slidev decks/demo/slides.md --bind 127.0.0.1 --open",
     "build": "slidev build decks/demo/slides.md",
-    "export": "powershell.exe -NoProfile -File scripts/Export-Deck.ps1",
-    "test": "powershell.exe -NoProfile -File scripts/Test-Workflow.ps1",
-    "check:public": "python scripts/check-public-repo.py"
+    "export": "powershell.exe -NoProfile -File ../PPTMaker.ps1 -Action Export"
   },
   "dependencies": {
     "@slidev/cli": "53.0.0",
