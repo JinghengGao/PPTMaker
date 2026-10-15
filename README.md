@@ -13,6 +13,7 @@
 ```powershell
 Push-Location .\research-ppt
 npm.cmd ci
+npx.cmd --no-install playwright install chromium
 Pop-Location
 
 powershell.exe -NoProfile -File .\PPTMaker.ps1 -Action Doctor

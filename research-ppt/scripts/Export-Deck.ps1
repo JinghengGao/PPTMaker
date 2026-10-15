@@ -137,13 +137,20 @@ try {
     New-Item -ItemType Directory -Path (Split-Path -Parent $previousOutputArchive) -Force | Out-Null
     Move-Item -LiteralPath $outputDirectory -Destination $previousOutputArchive
   }
-  try { Move-Item -LiteralPath $stagingDirectory -Destination $outputDirectory }
+  $published=$false
+  try {
+    Move-Item -LiteralPath $stagingDirectory -Destination $outputDirectory
+    $published=$true
+    & python (Join-Path $PSScriptRoot 'inspect-exports.py') --deck $deckDirectory --version $Version --output (Join-Path $runDirectory 'deliverables.json')
+    if ($LASTEXITCODE -ne 0) { throw 'Published export integrity check failed' }
+  }
   catch {
+    if ($published -and (Test-Path -LiteralPath $outputDirectory)) {
+      Move-Item -LiteralPath $outputDirectory -Destination (Join-Path $runDirectory 'failed-publication')
+    }
     if ($previousOutputArchive -and -not (Test-Path -LiteralPath $outputDirectory)) { Move-Item -LiteralPath $previousOutputArchive -Destination $outputDirectory }
     throw
   }
-  & python (Join-Path $PSScriptRoot 'inspect-exports.py') --deck $deckDirectory --version $Version --output (Join-Path $runDirectory 'deliverables.json')
-  if ($LASTEXITCODE -ne 0) { throw 'Published export integrity check failed' }
   @{version=$Version;run=$runId;outputs="exports/v$Version";report="screenshots/v$Version/export-runs/$runId/deliverables.json";snapshot="versions/v$Version/export-snapshots/$runId";previous_outputs=$previousOutputArchive;status='exported'} | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $deckDirectory "screenshots/v$Version/latest-export.json") -Encoding UTF8
   Write-Host "Export complete: $outputDirectory"
   Write-Host "Source snapshot: $snapshotDirectory"

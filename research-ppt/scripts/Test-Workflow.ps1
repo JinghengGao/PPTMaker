@@ -64,5 +64,27 @@ try {
 Assert-True ((Get-FileHash -LiteralPath $sentinel).Hash -eq $sentinelHash) 'Failed rebuild modified existing output'
 Assert-True (-not (Test-Path -LiteralPath $lock)) 'Failed export left its lock'
 $results.Add(@{test='failed export preserves hashes and releases own lock';status='passed'})
+# Simulate a failure after the staged files have passed inspection and moved.
+# These dummy artifacts stay in the disposable fixture, never in user decks.
+Set-Content -LiteralPath (Join-Path $mock 'mock-export.py') -Value @'
+import pathlib,sys
+args=sys.argv[1:]
+path=pathlib.Path(args[args.index('--output')+1])
+path.parent.mkdir(parents=True,exist_ok=True)
+path.write_bytes(b'fixture-output')
+'@ -Encoding ASCII
+Set-Content -LiteralPath (Join-Path $mock 'npx.cmd') -Value '@python "%~dp0mock-export.py" %*' -Encoding ASCII
+Set-Content -LiteralPath (Join-Path $engine 'scripts/inspect-exports.py') -Value @'
+import pathlib,sys
+args=sys.argv[1:]
+if '--directory' not in args:sys.exit(38)
+pathlib.Path(args[args.index('--output')+1]).write_text('{}',encoding='utf-8')
+'@ -Encoding ASCII
+try {
+  $env:PATH="$mock;$savedPath"
+  Expect-Failure 'publication failure rolls back old output' { & $cli -Action Export -DeckId test-talk -Version 1.0.0 -Rebuild } 'Published export integrity check failed'
+} finally { $env:PATH=$savedPath }
+Assert-True ((Get-FileHash -LiteralPath $sentinel).Hash -eq $sentinelHash) 'Publication rollback lost original output'
+Assert-True (-not (Test-Path -LiteralPath $lock)) 'Rollback left a lock'
 $results | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath (Join-Path $testRoot 'results.json') -Encoding UTF8
 Write-Output "Passed $($results.Count) workflow checks. Evidence: $testRoot"

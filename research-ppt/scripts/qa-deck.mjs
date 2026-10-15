@@ -18,18 +18,25 @@ const report = {
   checked_at: new Date().toISOString(), browser: browser.version(),
   browserPlugin: 'Browser plugin not available; using project Playwright',
   base: base.href, viewport: { width: 1600, height: 900 },
-  slides: [], errors: [], warnings: [], failedRequests: [], interaction: {},
+  slides: [], errors: [], warnings: [], failedRequests: [], cancelledNavigationRequests: [], interaction: {},
   manual_visual_review: 'required',
 }
 try {
   const page = await browser.newPage({ viewport: report.viewport, deviceScaleFactor: 1 })
+  // Screen-lock permissions are irrelevant to screenshot QA in headless Chromium.
+  await page.addInitScript(() => localStorage.setItem('slidev-wake-lock', 'false'))
   page.on('pageerror', e => report.errors.push({ type: 'pageerror', text: e.message }))
   page.on('console', m => {
     if (m.type() === 'error') report.errors.push({ type: 'console', text: m.text() })
     if (['warning', 'warn'].includes(m.type())) report.warnings.push(m.text())
   })
   page.on('response', r => { if (r.status() >= 400) report.failedRequests.push({ url: r.url(), status: r.status() }) })
-  page.on('requestfailed', r => report.failedRequests.push({ url: r.url(), error: r.failure()?.errorText }))
+  page.on('requestfailed', r => {
+    const item = { url: r.url(), error: r.failure()?.errorText }
+    // Slidev's navigation sync stream is cancelled normally when leaving a page.
+    if (new URL(r.url()).pathname === '/@server-reactive/nav' && item.error === 'net::ERR_ABORTED') report.cancelledNavigationRequests.push(item)
+    else report.failedRequests.push(item)
+  })
   const record = () => page.evaluate(() => {
     const root = [...document.querySelectorAll('.slidev-layout')].find(e => e.checkVisibility() && e.getBoundingClientRect().width > 10)
     if (!root) throw new Error('No visible slide')
