@@ -1,8 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="560" height="350" viewBox="0 0 560 350" role="img" aria-labelledby="title desc">
-  <title id="title">Example values</title>
-  <desc id="desc">Illustrative values A 60, B 75, C 90. Not experimental results.</desc>
-  <rect width="560" height="350" fill="#f8fafc"/>
-  <g stroke="#cbd5e1" fill="none"><path d="M65 55V280H505"/><path d="M65 100H505M65 160H505M65 220H505"/></g>
-  <g fill="#3b82f6"><rect x="115" y="160" width="70" height="120"/><rect x="245" y="130" width="70" height="150"/><rect x="375" y="100" width="70" height="180"/></g>
-  <g fill="#334155" font-family="Arial,sans-serif" font-size="22" text-anchor="middle"><text x="150" y="146">60</text><text x="280" y="116">75</text><text x="410" y="86">90</text><text x="150" y="313">A</text><text x="280" y="313">B</text><text x="410" y="313">C</text></g>
-</svg>

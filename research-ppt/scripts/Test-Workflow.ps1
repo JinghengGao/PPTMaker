@@ -12,7 +12,7 @@ try {
 $engine=Join-Path $testRoot 'research-ppt'
 New-Item -ItemType Directory -Path $engine -Force | Out-Null
 foreach ($name in @('scripts','config')) { Copy-Item -LiteralPath (Join-Path $root "research-ppt/$name") -Destination $engine -Recurse }
-foreach ($name in @('decks/demo','decks/_template','public/decks/demo','templates/_template')) {
+foreach ($name in @('decks/demo')) {
   $destination=Join-Path $engine $name
   New-Item -ItemType Directory -Path (Split-Path -Parent $destination) -Force | Out-Null
   New-Item -ItemType Directory -Path $destination -Force | Out-Null
@@ -20,6 +20,7 @@ foreach ($name in @('decks/demo','decks/_template','public/decks/demo','template
     Copy-Item -LiteralPath $file.FullName -Destination $destination
   }
 }
+Copy-Item -LiteralPath (Join-Path $root 'research-ppt/decks/demo/components') -Destination (Join-Path $engine 'decks/demo') -Recurse
 foreach ($name in @('PPTMaker.ps1')) { Copy-Item -LiteralPath (Join-Path $root $name) -Destination $testRoot }
 foreach ($name in @('package.json','package-lock.json')) { Copy-Item -LiteralPath (Join-Path $root "research-ppt/$name") -Destination $engine }
 $results=New-Object Collections.Generic.List[object]
@@ -39,6 +40,12 @@ $source=Join-Path $engine 'decks/test-talk/slides.md'
 $hash=(Get-FileHash -LiteralPath $source).Hash
 $brief=Get-Content -LiteralPath (Join-Path $engine 'decks/test-talk/brief.md') -Raw -Encoding UTF8
 Assert-True ($brief.Contains('test-talk') -and $brief.Contains('default@0.25.0') -and -not $brief.Contains('{{')) 'Created brief must record theme version and deck ID'
+$createdSource=Get-Content -LiteralPath $source -Raw -Encoding UTF8
+Assert-True ($createdSource -match '(?m)^theme: default' -and $createdSource.Contains('theme: seriph')) 'New must change only the frontmatter theme, preserving official theme examples'
+$counter=Join-Path $engine 'decks/test-talk/components/Counter.vue'
+Assert-True ((Get-FileHash -LiteralPath $counter).Hash -eq (Get-FileHash -LiteralPath (Join-Path $engine 'decks/demo/components/Counter.vue')).Hash) 'New must copy the official demo component'
+Assert-True (@(Get-ChildItem -LiteralPath (Join-Path $engine 'public/decks/test-talk') -Force).Count -eq 0) 'New must not add unused sample assets'
+$results.Add(@{test='official starter dependencies copied and only frontmatter theme changed';status='passed'})
 Expect-Failure 'duplicate deck does not overwrite' { & $cli -Action New -DeckId test-talk } 'already exist'
 Assert-True ((Get-FileHash -LiteralPath $source).Hash -eq $hash) 'Duplicate creation modified source'
 Expect-Failure 'path traversal rejected' { & $cli -Action New -DeckId '../escape' } 'pattern|ID must'
@@ -97,31 +104,8 @@ try {
 } finally { $env:PATH=$savedPath }
 Assert-True ((Get-FileHash -LiteralPath $sentinel).Hash -eq $sentinelHash) 'Publication rollback lost original output'
 Assert-True (-not (Test-Path -LiteralPath $lock)) 'Rollback left a lock'
-$results | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath (Join-Path $testRoot 'results.json') -Encoding UTF8
 Assert-True (Test-Path -LiteralPath (Join-Path $otherVersion 'keep.txt')) 'Another version was removed'
 $results.Add(@{test='other versions preserved';status='passed'})
 Assert-True (-not (Test-Path -LiteralPath (Join-Path $deck '.export-work'))) 'Temporary export data was retained'
-& $cli -Action Clean | Out-Null
-Assert-True ((Get-FileHash -LiteralPath $sentinel).Hash -eq $sentinelHash) 'Read-only cleanup preview deleted output'
-$results.Add(@{test='cleanup defaults to read-only preview';status='passed'})
-$archivedLock=Join-Path $deck 'archive/workflow/test-fixtures/.export.lock'
-New-Item -ItemType Directory -Path (Split-Path -Parent $archivedLock) -Force | Out-Null
-Set-Content -LiteralPath $archivedLock -Value 'historical test lock'
-Assert-True (@(Get-CleanupBlockers $engine @()).Count -eq 0) 'Archived fixture lock blocked cleanup'
-Assert-True (Test-Path -LiteralPath $archivedLock) 'Lock inspection modified archived files'
-$results.Add(@{test='cleanup ignores archived fixture locks without modifying files';status='passed'})
-$processes=@(
-  [pscustomobject]@{ProcessId=101;CommandLine=('node "'+$engine.ToUpperInvariant().Replace('\','/')+'/node_modules/@slidev/cli/bin/slidev.mjs"')},
-  [pscustomobject]@{ProcessId=102;CommandLine=('node "'+$engine+'-other/node_modules/@slidev/cli/bin/slidev.mjs"')},
-  [pscustomobject]@{ProcessId=103;CommandLine=('node "'+$engine+'/scripts/unrelated.mjs"')},
-  [pscustomobject]@{ProcessId=104;CommandLine=$null}
-)
-$blockers=@(Get-CleanupBlockers $engine $processes)
-Assert-True ($blockers.Count -eq 1 -and $blockers[0].Contains('PID=101')) 'Process guard must identify only this workspace Slidev process'
-$results.Add(@{test='cleanup identifies running Slidev and ignores unrelated processes';status='passed'})
-Set-Content -LiteralPath $lock -Value 'test root lock'
-Expect-Failure 'cleanup reports deck-root lock before deleting files' { & $cli -Action Clean -Apply } ([regex]::Escape($lock))
-Assert-True ((Get-FileHash -LiteralPath $sentinel).Hash -eq $sentinelHash) 'Blocked cleanup deleted output'
-Assert-True (Test-Path -LiteralPath $lock) 'Blocked cleanup removed a foreign lock'
 Write-Output "Passed $($results.Count) workflow checks. Temporary fixtures are removed."
 } finally { Remove-GeneratedPath $testRoot $tempParent }

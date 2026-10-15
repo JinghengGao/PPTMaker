@@ -1,34 +1,49 @@
 # 维护说明
 
-## 实现边界
+## 代码分工
 
-PPTMaker.ps1 分发 Doctor/New/Preview/Export/Check。Workspace.ps1 提供 ID、路径和安全清理；New-Deck 创建独立目录；config/vite.ts 为 deck 提供共享资源配置。
+根 PPTMaker.ps1 只分发日常命令；不保留兼容入口或一次性迁移清理命令。
 
-所有命令直接运行 decks/<id>/slides.md，不保留引擎根 slides.md 或根 Vite 转发。依赖版本固定在 package.json 与锁文件中，不盲目升级。
+| 文件 | 职责 |
+| --- | --- |
+| Workspace.ps1 | deck ID、路径边界、配置读取与临时目录清理 |
+| New-Deck.ps1 | 从官方示例创建 deck、任务书与 QA，不覆盖已有目录 |
+| Doctor.ps1 / doctor.mjs | Node、npm、Python、Git、Slidev、Chromium 和可选 PowerPoint |
+| Export-Deck.ps1 | PDF 与可编辑 PPTX、并发锁、暂存检查和失败回滚 |
+| Test-Exports.ps1 | 成品结构、原生渲染及可选浏览器检查，结束后删除临时文件 |
+| inspect-exports.py | PDF 头尾、PPTX 页数、原生对象、ZIP 完整性与哈希 |
+| Render-Pdf.ps1 / Render-PowerPoint.ps1 | Windows 原生逐页渲染；也可用于本地参考分析 |
+| qa-deck.mjs | 逐页检查溢出、图片、公式、控制台与翻页 |
+| Test-Workflow.ps1 | 隔离临时副本中的文件保护和导出回滚测试 |
+| check-public-repo.py | Git 索引中的公开路径、敏感内容与文档链接 |
 
-## 每版两份成品
+共用 config/vite.ts 指向 public/，禁止构建时复制整个私人素材目录。New 为每个新 deck 写入配置转接文件；官方 demo 不需要额外配置。保留 research-ppt 引擎边界，避免改变本地既有作品的相对路径。
 
-Export-Deck 只生成 PDF 与可编辑 PPTX，放在 exports/v<版本>/。同版本可直接重导，其他版本不动。
+## 导出事务
 
-导出时先获得 deck 锁，在 .export-work 准备并检查新成品。替换过程中原输出暂存于 previous；发布校验失败则恢复，成功后删除临时内容。不保存运行日志、输入快照、截图和重导历史。异常中断留下的 previous 必须先检查恢复，不能直接删除。
+Export 先取得 deck 根 .export.lock，在 .export-work 准备并检查新成品，再替换 exports/v<版本>/。旧输出只在事务内暂存为 previous，发布检查失败则恢复；成功后删除临时文件。异常中断时先检查恢复 previous，不能直接删除最后一份旧成品。
 
-export.config.json 默认只声明 theme 与 themeVersion。本地主题使用 themeId。editablePostprocessor 可指向 deck 内的 Python 脚本，接收目标 PPTX 与 --report 参数；修复报告及副本只存在于临时工作目录。该脚本所需的原始输入与依赖应保存在当前 deck，不放到历史目录。
+export.config.json 可记录 theme、themeVersion；本地主题使用 themeId。可选 editablePostprocessor 指向 deck 内 Python 脚本，接收目标 PPTX 与 --report 参数。私人修复逻辑和依赖保持在对应 deck，不进入通用引擎。
 
-Check 在系统临时目录完成结构检查、PDF 渲染及可选 PPTX/浏览器检查，最后自动删除临时文件。缺少 PowerPoint 或未请求浏览器检查时明确说明，不冒称通过。人工审阅直接打开成品。
-
-## 检查与发布
+## 检查与提交
 
 ```powershell
-Push-Location research-ppt
+cd research-ppt
 npm.cmd test
-Pop-Location
-python research-ppt/scripts/check-public-repo.py
+cd ..
+git add .
+python -B research-ppt/scripts/check-public-repo.py
+git diff --cached --stat
 ```
 
-文件保护测试使用临时副本，结束后清理。共享代码变更后应验证示例的实际预览和两格式导出；排版变更还要逐页查看临时截图，验收后删除。
+公开检查读取 Git 索引；先审阅完整跟踪清单，再提交。依赖版本固定，不顺带升级。用户 deck、主题、资料和成品默认忽略；Git 忽略不是备份，重要材料需自行保存。
 
-公开检查器读取 Git 索引。私人内容默认忽略，禁止强制暂存；公开新示例时同步调整忽略规则与检查器白名单。当前不添加项目许可证、不建立远程仓库或推送。
+共享代码修改后验证 New、Preview、Export、Check；演示内容变动须逐页观察。测试与渲染使用临时目录，不提交截图、报告、依赖和机器配置。官方 demo 的来源在根第三方声明中，其 slides.md 应与安装包 @slidev/cli/template.md 内容一致，Counter.vue 来自同一版本的官方脚手架。
 
-## 清理旧工作区
+## 限制
 
-根入口 Clean 默认只列出生成物清单，Apply 才删除。删除前检查范围、链接和活动导出进程；逐个删除文件，仅删除已空的目录。保留所有版本的 PDF/可编辑 PPTX、源稿、素材、当前 hook 及其同目录依赖、第三方运行库和私人笔记。
+- Windows 优先，未验证 macOS/Linux。缺少 PowerPoint 时明确跳过 PPTX 原生渲染。
+- 可编辑 PPTX 中的公式、SVG 或复杂效果可能仍为图片；对象结构检查不替代视觉审阅。
+- 官方 demo 使用在线图片、推文、字体及 PlantUML 服务，网络受限时可能缺失；不为离线运行改写官方稿。
+- 锁定 Slidev 53 工具链曾出现 FloatingVue / Twoslash 的 Popper 控制台错误。浏览器 QA 默认失败；显式加 AllowKnownToolchainIssues 仅接受已知条目。
+- 本项目授权尚未确定；保留第三方许可，不创建远程仓库或推送。

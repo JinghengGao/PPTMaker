@@ -39,22 +39,6 @@ function Assert-EngineDependencies {
   [void](Get-Command npx.cmd -ErrorAction Stop)
 }
 
-function Get-CleanupBlockers([string]$EngineDirectory, [object[]]$NodeProcesses) {
-  $enginePrefix=[IO.Path]::GetFullPath($EngineDirectory).Replace('\','/').TrimEnd('/')+'/'
-  foreach ($process in $NodeProcesses) {
-    $command=$process.CommandLine
-    if ($command -and $command.Replace('\','/').IndexOf($enginePrefix,[StringComparison]::OrdinalIgnoreCase) -ge 0 -and $command -match 'slidev') {
-      Write-Output "Slidev process PID=$($process.ProcessId): $command"
-    }
-  }
-  # Export-Deck creates its lock directly in the deck directory. Locks inside
-  # archives, snapshots and test fixtures are historical files, not active locks.
-  foreach ($deck in Get-ChildItem -LiteralPath (Join-Path $EngineDirectory 'decks') -Directory) {
-    $lock=Join-Path $deck.FullName '.export.lock'
-    if (Test-Path -LiteralPath $lock) { Write-Output "Export lock: $lock" }
-  }
-}
-
 function Remove-GeneratedPath([string]$Path, [string]$ParentDirectory) {
   Assert-WithinDirectory $Path $ParentDirectory
   if (Test-Path -LiteralPath $Path) {

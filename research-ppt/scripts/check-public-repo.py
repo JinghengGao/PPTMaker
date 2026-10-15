@@ -13,16 +13,15 @@ def git(*args):
 def allowed(path):
     root_files = {'.gitignore', '.gitattributes', 'AGENTS.md', 'README.md',
                   'PPTMaker.ps1', 'THIRD_PARTY_NOTICES.md'}
-    engine_files = {'AGENTS.md', 'README.md', 'package.json', 'package-lock.json'}
-    if path in root_files or path == 'references/inbox/README.md':
+    engine_files = {'package.json', 'package-lock.json'}
+    if path in root_files:
         return True
     if path.startswith('docs/'):
         return path.endswith('.md')
     if not path.startswith('research-ppt/'):
         return False
     rel = path.removeprefix('research-ppt/')
-    return rel in engine_files or rel.startswith(('scripts/', 'config/', 'decks/demo/',
-            'decks/_template/', 'templates/_template/', 'public/decks/demo/'))
+    return rel in engine_files or rel.startswith(('scripts/', 'config/', 'decks/demo/'))
 
 
 def main():

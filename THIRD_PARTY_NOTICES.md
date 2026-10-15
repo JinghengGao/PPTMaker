@@ -9,9 +9,14 @@ PPTMaker 基于 Slidev，不声称拥有 Slidev、其主题或其他依赖的版
 | Vue | 3.5.43 | [vuejs/core](https://github.com/vuejs/core) | MIT |
 | Playwright Chromium | 1.63.0 | [microsoft/playwright](https://github.com/microsoft/playwright) | Apache-2.0 |
 
-Seriph 保留为既有本地演示的兼容依赖，公开示例使用 default。完整依赖和许可见锁文件及安装包内许可文件，浏览器组件仍遵循各自许可。
+官方示例使用 Seriph；New 默认使用 default。完整依赖和许可见锁文件及安装包内许可文件，浏览器组件仍遵循各自许可。
 
-示例文字和 SVG 是本项目的示例内容，数值不代表研究结果。私人参考、衍生主题、论文图片、字体和研究作品不在公开范围，其权利不因本仓库改变。本机安装的 AI Skills 不随仓库分发。
+demo 原样取自 Slidev v53.0.0：
+
+- [slides.md](https://github.com/slidevjs/slidev/blob/v53.0.0/packages/slidev/template.md)
+- [components/Counter.vue](https://github.com/slidevjs/slidev/blob/v53.0.0/packages/create-app/template/components/Counter.vue)
+
+以上文件遵循下方 Slidev MIT 许可。示例引用的外部图片、推文、字体和服务仍适用各自权利与使用条件。私人参考、衍生主题、论文图片、字体和研究作品不在公开范围，其权利不因本仓库改变。本机安装的 AI Skills 不随仓库分发。
 
 以下保留直接依赖的许可原文。
 

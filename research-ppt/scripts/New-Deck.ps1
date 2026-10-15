@@ -36,15 +36,33 @@ try {
   if ((Test-Path -LiteralPath $deck) -or (Test-Path -LiteralPath $assets)) { throw 'Deck or assets appeared during creation.' }
   foreach ($path in @($deck,$assets,(Join-Path $deck 'exports'))) { New-Item -ItemType Directory -Path $path | Out-Null }
   $source = Get-Content -LiteralPath (Join-Path $script:EngineDirectory 'decks/demo/slides.md') -Raw -Encoding UTF8
-  $source = $source.Replace('theme: default', "theme: $themeValue").Replace('/decks/demo/', "/decks/$DeckId/")
+  # Only change the frontmatter theme; keep theme examples in the official demo intact.
+  $source = ([regex]'(?m)^theme: seriph\r?$').Replace($source, "theme: $themeValue", 1)
   $utf8 = New-Object Text.UTF8Encoding($false)
   [IO.File]::WriteAllText((Join-Path $deck 'slides.md'), $source, $utf8)
   [IO.File]::WriteAllText((Join-Path $deck 'vite.config.ts'), "export { default } from '../../config/vite.ts'`n", $utf8)
   [IO.File]::WriteAllText((Join-Path $deck 'export.config.json'), ($config | ConvertTo-Json) + "`n", $utf8)
-  $brief = Get-Content -LiteralPath (Join-Path $script:EngineDirectory 'decks/_template/brief.md') -Raw -Encoding UTF8
-  $brief = $brief.Replace('{{DECK_ID}}', $DeckId).Replace('{{THEME_ID}}', $Theme).Replace('{{THEME_VERSION}}', $themeVersion)
+  $brief = @"
+# Presentation brief
+
+- Deck: $DeckId
+- Theme: $Theme@$themeVersion
+- Title, audience and duration: [fill in]
+- Main message and outline: [fill in]
+- Materials and citations: [fill in]
+- Author and affiliation: [fill in or leave blank]
+- Deliverables: PDF and editable PPTX in exports/vX.Y.Z/
+"@
   [IO.File]::WriteAllText((Join-Path $deck 'brief.md'), $brief, $utf8)
-  Copy-Item -LiteralPath (Join-Path $script:EngineDirectory 'decks/_template/QA-CHECKLIST.md') -Destination (Join-Path $deck 'QA.md')
-  Copy-Item -LiteralPath (Join-Path $script:EngineDirectory 'public/decks/demo/sample.svg') -Destination (Join-Path $assets 'sample.svg')
+  $qa = @'
+# Review checklist
+
+- [ ] Review every slide: layout, fonts, images, formulas and technical content.
+- [ ] Verify data and citations; mark placeholders clearly.
+- [ ] Open the PDF and editable PPTX; check native text and image fidelity.
+- [ ] Record commands, results and remaining issues below.
+'@
+  [IO.File]::WriteAllText((Join-Path $deck 'QA.md'), $qa, $utf8)
+  Copy-Item -LiteralPath (Join-Path $script:EngineDirectory 'decks/demo/components') -Destination $deck -Recurse
 } finally { $creationLock.Dispose(); Remove-Item -LiteralPath $marker }
 Write-Output "Created $deck (theme: $Theme). Edit brief.md, slides.md and QA.md."
