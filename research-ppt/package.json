@@ -1,0 +1,24 @@
+{
+  "name": "research-ppt",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "slidev decks/demo/slides.md --bind 127.0.0.1 --open",
+    "build": "slidev build decks/demo/slides.md",
+    "export": "powershell.exe -NoProfile -File scripts/Export-Deck.ps1",
+    "test": "powershell.exe -NoProfile -File scripts/Test-Workflow.ps1",
+    "check:public": "python scripts/check-public-repo.py"
+  },
+  "dependencies": {
+    "@slidev/cli": "53.0.0",
+    "@slidev/theme-default": "0.25.0",
+    "@slidev/theme-seriph": "0.25.0",
+    "vue": "3.5.43"
+  },
+  "devDependencies": {
+    "playwright-chromium": "1.63.0"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  }
+}

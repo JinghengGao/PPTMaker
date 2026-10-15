@@ -1,0 +1,35 @@
+# Local research and generated artifacts never belong to the public repository.
+/_local/
+/Relevant Materials/
+**/node_modules/
+**/.agents/
+**/.env
+**/.env.*
+**/*.local
+**/__pycache__/
+**/.DS_Store
+**/dist/
+**/.vite-inspect/
+**/.remote-assets/
+**/components.d.ts
+**/.export.lock
+**/*.creating
+**/screenshots/
+**/exports/
+**/versions/
+**/archive/
+/references/*
+!/references/inbox/
+/references/inbox/*
+!/references/inbox/README.md
+/research-ppt/decks/*
+!/research-ppt/decks/_template/
+!/research-ppt/decks/demo/
+/research-ppt/templates/*
+!/research-ppt/templates/_template/
+/research-ppt/public/*
+!/research-ppt/public/decks/
+/research-ppt/public/decks/*
+!/research-ppt/public/decks/demo/
+/research-ppt/skills-lock.json
+/research-ppt/slides-export.*
