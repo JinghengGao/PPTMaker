@@ -1,5 +1,7 @@
 # 创作流程
 
+初始仓库的三套完整示例可直接使用 Preview、Export、Check：demo 为 Slidev 官方示例，template-mc、template-nku 为两套主题示例，源稿分别位于主题 examples/。无需先 New；这三个保留 ID 不用于创建自己的作品。
+
 ## 新演示
 
 1. 用根入口 New 创建独立 deck，填写 brief.md 的受众、目标、主题、资料来源和版本。

@@ -22,7 +22,7 @@ cd ..
 
 **demo 是 Slidev 53.0.0 的官方 Starter 原稿及 Counter 组件**，使用官方 Seriph 主题。在线图片、推文、字体及 PlantUML 示例需要网络，离线时可能无法完整显示。
 
-仓库附带 v1.0.0 的 [PDF](research-ppt/decks/demo/exports/v1.0.0/demo-v1.0.0.pdf) 和 [可编辑 PPTX](research-ppt/decks/demo/exports/v1.0.0/demo-v1.0.0-editable.pptx)，克隆后可直接打开。该版 PDF 的第 2 页渐变标题在 Windows 渲染中异常，第 6 页在线推文未显示；官方随机封面也会使两格式背景不同。源码保持原样。
+三套内置示例均附带源稿及 v1.0.0 的 PDF、可编辑 PPTX，克隆后即可直接打开或预览，无需先运行 New。官方 demo 的 PDF 第 2 页渐变标题在 Windows 渲染中异常，第 6 页在线推文未显示；官方随机封面也会使两格式背景不同。源码保持原样。
 
 ## 制作自己的演示
 
@@ -37,14 +37,34 @@ New 从官方示例创建独立副本，默认使用 default 主题；支持 `-T
 
 Deck ID 使用小写字母、数字及连字符；版本使用 X.Y.Z。成品位于 `research-ppt/decks/my-talk/exports/v1.0.0/`。同版本重导成功后替换，失败保留旧成品，其他版本不动。临时截图和报告结束后删除。
 
+demo、template-mc、template-nku 是内置示例的保留 ID；自己的作品使用其他 ID。
+
 Check 检查成品结构并渲染 PDF；安装 PowerPoint 时还会原生渲染 PPTX。可加 `-RequirePowerPoint` 要求原生检查，或 `-PreviewUrl http://localhost:3030` 检查正在预览的全部页面。人工仍需打开最终文件逐页复核；公式、SVG 和复杂效果可能是图片，不保证所有对象可编辑。
 
-## 内置通用主题
+## 三套内置示例
 
-| 主题 | 特征 | 使用说明与八页示例 |
+| 示例 ID | 特征 | 使用说明与现成文件 |
 | --- | --- | --- |
-| TemplateMC | 蓝色标题区、三段页脚、三线表与公式框 | [主题说明](research-ppt/templates/template-mc/STYLE-GUIDE.md) · [PDF](research-ppt/templates/template-mc/examples/exports/v1.0.0/template-mc-v1.0.0.pdf) · [PPTX](research-ppt/templates/template-mc/examples/exports/v1.0.0/template-mc-v1.0.0-editable.pptx) |
-| TemplateNKU | 南开紫、原版校徽与建筑插图、可高亮目录 | [主题说明](research-ppt/templates/template-nku/STYLE-GUIDE.md) · [PDF](research-ppt/templates/template-nku/examples/exports/v1.0.0/template-nku-v1.0.0.pdf) · [PPTX](research-ppt/templates/template-nku/examples/exports/v1.0.0/template-nku-v1.0.0-editable.pptx) |
+| demo | Slidev 官方 Starter / Seriph，11 页 | [源稿](research-ppt/decks/demo/slides.md) · [PDF](research-ppt/decks/demo/exports/v1.0.0/demo-v1.0.0.pdf) · [PPTX](research-ppt/decks/demo/exports/v1.0.0/demo-v1.0.0-editable.pptx) |
+| template-mc | TemplateMC 蓝色科研主题，8 页 | [主题说明](research-ppt/templates/template-mc/STYLE-GUIDE.md) · [PDF](research-ppt/templates/template-mc/examples/exports/v1.0.0/template-mc-v1.0.0.pdf) · [PPTX](research-ppt/templates/template-mc/examples/exports/v1.0.0/template-mc-v1.0.0-editable.pptx) |
+| template-nku | TemplateNKU 南开紫及原版校徽、建筑，8 页 | [主题说明](research-ppt/templates/template-nku/STYLE-GUIDE.md) · [PDF](research-ppt/templates/template-nku/examples/exports/v1.0.0/template-nku-v1.0.0.pdf) · [PPTX](research-ppt/templates/template-nku/examples/exports/v1.0.0/template-nku-v1.0.0-editable.pptx) |
+
+可直接选择任意示例运行；切换前用 Ctrl+C 停止当前预览：
+
+```powershell
+.\PPTMaker.ps1 -Action Preview -DeckId demo
+.\PPTMaker.ps1 -Action Preview -DeckId template-mc
+.\PPTMaker.ps1 -Action Preview -DeckId template-nku
+```
+
+三套示例同样支持 Export 和 Check，例如：
+
+```powershell
+.\PPTMaker.ps1 -Action Export -DeckId template-mc -Version 1.1.0
+.\PPTMaker.ps1 -Action Check -DeckId template-mc -Version 1.1.0
+```
+
+MC、NKU 示例成品保存在各主题的 `examples/exports/`，不另建重复 deck。制作自己的演示时再运行 New：
 
 ```powershell
 .\PPTMaker.ps1 -Action New -DeckId mc-talk -Theme TemplateMC

@@ -1,6 +1,7 @@
 {
   "name": "slidev-theme-template-nku",
   "version": "1.0.0",
+  "type": "module",
   "private": true,
   "description": "TemplateNKU local Slidev theme for PPTMaker",
   "engines": {

@@ -1,6 +1,7 @@
 {
   "name": "slidev-theme-template-mc",
   "version": "1.0.0",
+  "type": "module",
   "private": true,
   "description": "TemplateMC local Slidev theme for PPTMaker",
   "engines": {

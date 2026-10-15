@@ -21,6 +21,8 @@ PDF 中字体包括 Liberation Sans、Noto Sans CJK JP、TeX Gyre Termes Math。
 
 ## 创建与编辑
 
+仓库自带完整示例，可直接运行 `.\PPTMaker.ps1 -Action Preview -DeckId template-nku`；初始 PDF/PPTX 位于本主题 examples/exports/v1.0.0/。制作自己的作品时再使用下面的 New。
+
 在仓库根目录运行：
 
 ~~~powershell

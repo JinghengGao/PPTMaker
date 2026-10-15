@@ -22,7 +22,10 @@ function Assert-WithinDirectory([string]$Path, [string]$Directory) {
 
 function Get-DeckDirectory([string]$DeckId, [switch]$MustExist) {
   Assert-WorkspaceId $DeckId
-  $path = Join-Path $script:EngineDirectory "decks/$DeckId"
+  # Built-in examples stay with their theme; avoid a second copy in decks/.
+  if ($DeckId -in @('template-mc','template-nku')) {
+    $path = Join-Path $script:EngineDirectory "templates/$DeckId/examples"
+  } else { $path = Join-Path $script:EngineDirectory "decks/$DeckId" }
   Assert-WithinDirectory $path $script:EngineDirectory
   if ($MustExist -and -not (Test-Path -LiteralPath (Join-Path $path 'slides.md') -PathType Leaf)) { throw "Deck source missing: $path" }
   return $path
@@ -32,6 +35,18 @@ function Get-DeckConfig([string]$DeckDirectory) {
   $path = Join-Path $DeckDirectory 'export.config.json'
   if (Test-Path -LiteralPath $path -PathType Leaf) { return Get-Content -LiteralPath $path -Raw -Encoding UTF8 | ConvertFrom-Json }
   return $null
+}
+
+function Open-DeckLock([string]$DeckDirectory, [string]$Version) {
+  $path=Join-Path $DeckDirectory '.export.lock'
+  Assert-WithinDirectory $path $DeckDirectory
+  try { $handle=[IO.File]::Open($path,[IO.FileMode]::CreateNew,[IO.FileAccess]::Write,[IO.FileShare]::Read) }
+  catch { throw "Another export/check is running, or a stale lock exists: $path" }
+  try {
+    $bytes=[Text.Encoding]::UTF8.GetBytes("PID=$PID; version=$Version")
+    $handle.Write($bytes,0,$bytes.Length); $handle.Flush()
+    return $handle
+  } catch { $handle.Dispose(); Remove-Item -LiteralPath $path; throw }
 }
 
 function Assert-EngineDependencies {
@@ -188,10 +203,7 @@ function Export-WorkspaceDeck {
   Assert-WithinDirectory $outputDirectory $deckDirectory
   if ((Test-Path -LiteralPath $outputDirectory) -and -not (Test-Path -LiteralPath $outputDirectory -PathType Container)) { throw 'Output path is not a directory.' }
   try {
-    try { $lock=[IO.File]::Open($lockPath,[IO.FileMode]::CreateNew,[IO.FileAccess]::Write,[IO.FileShare]::Read) }
-    catch { throw "Another export is running, or a stale lock exists: $lockPath" }
-    $bytes=[Text.Encoding]::UTF8.GetBytes("PID=$PID; version=$Version")
-    $lock.Write($bytes,0,$bytes.Length);$lock.Flush()
+    $lock=Open-DeckLock $deckDirectory $Version
     if (Test-Path -LiteralPath $work) { throw 'Interrupted export found in .export-work. Inspect it before removing the stale lock/work directory.' }
     New-Item -ItemType Directory -Path $prepared -Force | Out-Null
     $ownsWork=$true
@@ -207,7 +219,7 @@ function Export-WorkspaceDeck {
         & python -B $postprocessor ($stem+'-editable.pptx') --report (Join-Path $work 'reports/editable-fixes.json')
         if ($LASTEXITCODE -ne 0) { throw 'Editable PPTX postprocessing failed' }
       }
-      & python -B (Join-Path $script:ScriptsDirectory 'inspect-exports.py') --deck $deckDirectory --version $Version --directory $prepared --output (Join-Path $work 'prepared.json')
+      & python -B (Join-Path $script:ScriptsDirectory 'inspect-exports.py') --deck $deckDirectory --version $Version --directory $prepared --output (Join-Path $work 'prepared.json') --prepare
       if ($LASTEXITCODE -ne 0) { throw 'Prepared export integrity check failed' }
       New-Item -ItemType Directory -Path (Split-Path -Parent $outputDirectory) -Force | Out-Null
       # The previous pair exists only during this transaction, for rollback.
@@ -251,38 +263,42 @@ function Test-WorkspaceDeck {
   if ($PreviewUrl -and $PreviewUrl -notmatch '^http://(localhost|127\.0\.0\.1)(:\d+)?/?$') { throw 'PreviewUrl must be a local HTTP preview root' }
   $hasPowerPoint=[bool][Type]::GetTypeFromProgID('PowerPoint.Application')
   if ($RequirePowerPoint -and -not $hasPowerPoint) { throw 'PowerPoint is required but not registered.' }
-  $tempParent=[IO.Path]::GetTempPath()
-  $work=Join-Path $tempParent ('pptmaker-check-'+[Guid]::NewGuid().ToString('N'))
-  New-Item -ItemType Directory -Path $work | Out-Null
-  Push-Location $script:EngineDirectory
+  $lockPath=Join-Path $deck '.export.lock'
+  $lock=Open-DeckLock $deck $Version
   try {
-    & python -B (Join-Path $script:ScriptsDirectory 'inspect-exports.py') --deck $deck --version $Version --output (Join-Path $work 'deliverables.json')
-    if ($LASTEXITCODE -ne 0) { throw 'Deliverable integrity check failed' }
-    $audit=Get-Content -LiteralPath (Join-Path $work 'deliverables.json') -Raw -Encoding UTF8 | ConvertFrom-Json
-    $stem=Join-Path $exports "$DeckId-v$Version"
-    & powershell.exe -NoProfile -File (Join-Path $script:ScriptsDirectory 'Render.ps1') -Format Pdf -InputFile ($stem+'.pdf') -OutputDirectory (Join-Path $work 'pdf') -Width 1600
-    if ($LASTEXITCODE -ne 0) { throw 'Native PDF rendering failed' }
-    $pdf=Get-Content -LiteralPath (Join-Path $work 'pdf/pdf-inspection.json') -Raw -Encoding UTF8 | ConvertFrom-Json
-    if ($pdf.page_count -ne $audit.slides -or @(Get-ChildItem -LiteralPath (Join-Path $work 'pdf') -Filter 'slide-*.png').Count -ne $audit.slides) { throw 'PDF page count differs or rendering is incomplete' }
-    if ($hasPowerPoint) {
-      & powershell.exe -NoProfile -File (Join-Path $script:ScriptsDirectory 'Render.ps1') -Format PowerPoint -InputFile ($stem+'-editable.pptx') -OutputDirectory (Join-Path $work 'editable') -Width 1600
-      if ($LASTEXITCODE -ne 0) { throw 'Native PowerPoint rendering failed' }
-      $render=Get-Content -LiteralPath (Join-Path $work 'editable/powerpoint-inspection.json') -Raw -Encoding UTF8 | ConvertFrom-Json
-      if ($render.slide_count -ne $audit.slides -or @(Get-ChildItem -LiteralPath (Join-Path $work 'editable') -Filter 'slide-*.png').Count -ne $audit.slides -or $render.sha256.ToLowerInvariant() -ne (Get-FileHash -LiteralPath ($stem+'-editable.pptx')).Hash.ToLowerInvariant()) { throw 'PPTX evidence mismatch' }
+    $tempParent=[IO.Path]::GetTempPath()
+    $work=Join-Path $tempParent ('pptmaker-check-'+[Guid]::NewGuid().ToString('N'))
+    New-Item -ItemType Directory -Path $work | Out-Null
+    Push-Location $script:EngineDirectory
+    try {
+      & python -B (Join-Path $script:ScriptsDirectory 'inspect-exports.py') --deck $deck --version $Version --output (Join-Path $work 'deliverables.json')
+      if ($LASTEXITCODE -ne 0) { throw 'Deliverable integrity check failed' }
+      $audit=Get-Content -LiteralPath (Join-Path $work 'deliverables.json') -Raw -Encoding UTF8 | ConvertFrom-Json
+      $stem=Join-Path $exports "$DeckId-v$Version"
+      & powershell.exe -NoProfile -File (Join-Path $script:ScriptsDirectory 'Render.ps1') -Format Pdf -InputFile ($stem+'.pdf') -OutputDirectory (Join-Path $work 'pdf') -Width 1600
+      if ($LASTEXITCODE -ne 0) { throw 'Native PDF rendering failed' }
+      $pdf=Get-Content -LiteralPath (Join-Path $work 'pdf/pdf-inspection.json') -Raw -Encoding UTF8 | ConvertFrom-Json
+      if ($pdf.page_count -ne $audit.slides -or @(Get-ChildItem -LiteralPath (Join-Path $work 'pdf') -Filter 'slide-*.png').Count -ne $audit.slides) { throw 'PDF page count differs or rendering is incomplete' }
+      if ($hasPowerPoint) {
+        & powershell.exe -NoProfile -File (Join-Path $script:ScriptsDirectory 'Render.ps1') -Format PowerPoint -InputFile ($stem+'-editable.pptx') -OutputDirectory (Join-Path $work 'editable') -Width 1600
+        if ($LASTEXITCODE -ne 0) { throw 'Native PowerPoint rendering failed' }
+        $render=Get-Content -LiteralPath (Join-Path $work 'editable/powerpoint-inspection.json') -Raw -Encoding UTF8 | ConvertFrom-Json
+        if ($render.slide_count -ne $audit.slides -or @(Get-ChildItem -LiteralPath (Join-Path $work 'editable') -Filter 'slide-*.png').Count -ne $audit.slides -or $render.sha256.ToLowerInvariant() -ne (Get-FileHash -LiteralPath ($stem+'-editable.pptx')).Hash.ToLowerInvariant()) { throw 'PPTX evidence mismatch' }
+      }
+      $browserStatus='not requested'
+      if ($PreviewUrl) {
+        $qa=@((Join-Path $script:ScriptsDirectory 'browser.mjs'),$PreviewUrl,(Join-Path $work 'browser'),$audit.slides)
+        if ($AllowKnownToolchainIssues) { $qa+='--allow-known-toolchain-issues' }
+        & node @qa
+        if ($LASTEXITCODE -ne 0) { throw 'Browser preview check failed' }
+        $browserStatus=(Get-Content -LiteralPath (Join-Path $work 'browser/browser-qa.json') -Raw -Encoding UTF8 | ConvertFrom-Json).status
+      }
+      $pptxStatus=if ($hasPowerPoint) { 'passed' } else { 'skipped: PowerPoint not installed' }
+      Write-Output "Check: $($audit.slides) pages; PDF passed; editable PPTX $pptxStatus; browser $browserStatus."
+      Write-Output 'Temporary render files are removed. Open the final PDF/PPTX for visual review.'
+    } finally {
+      Pop-Location
+      Remove-GeneratedPath $work $tempParent
     }
-    $browserStatus='not requested'
-    if ($PreviewUrl) {
-      $qa=@((Join-Path $script:ScriptsDirectory 'browser.mjs'),$PreviewUrl,(Join-Path $work 'browser'),$audit.slides)
-      if ($AllowKnownToolchainIssues) { $qa+='--allow-known-toolchain-issues' }
-      & node @qa
-      if ($LASTEXITCODE -ne 0) { throw 'Browser preview check failed' }
-      $browserStatus=(Get-Content -LiteralPath (Join-Path $work 'browser/browser-qa.json') -Raw -Encoding UTF8 | ConvertFrom-Json).status
-    }
-    $pptxStatus=if ($hasPowerPoint) { 'passed' } else { 'skipped: PowerPoint not installed' }
-    Write-Output "Check: $($audit.slides) pages; PDF passed; editable PPTX $pptxStatus; browser $browserStatus."
-    Write-Output 'Temporary render files are removed. Open the final PDF/PPTX for visual review.'
-  } finally {
-    Pop-Location
-    Remove-GeneratedPath $work $tempParent
-  }
+  } finally { $lock.Dispose(); Remove-Item -LiteralPath $lockPath }
 }

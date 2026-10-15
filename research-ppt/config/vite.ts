@@ -4,5 +4,6 @@ import { fileURLToPath } from 'node:url'
 // Location is relative to this helper, independent of the selected deck entry.
 export default defineConfig({
   publicDir: fileURLToPath(new URL('../public', import.meta.url)),
+  server: { fs: { allow: [fileURLToPath(new URL('../', import.meta.url))] } },
   build: { copyPublicDir: false },
 })

@@ -16,7 +16,7 @@ demo 原样取自 Slidev v53.0.0：
 - [slides.md](https://github.com/slidevjs/slidev/blob/v53.0.0/packages/slidev/template.md)
 - [components/Counter.vue](https://github.com/slidevjs/slidev/blob/v53.0.0/packages/create-app/template/components/Counter.vue)
 
-以上文件遵循下方 Slidev MIT 许可。示例引用的外部图片、推文、字体和服务仍适用各自权利与使用条件。私人参考、衍生主题、论文图片、字体和研究作品不在公开范围，其权利不因本仓库改变。本机安装的 AI Skills 不随仓库分发。
+以上文件遵循下方 Slidev MIT 许可。示例引用的外部图片、推文、字体和服务仍适用各自权利与使用条件。未纳入 Git 的私人参考、自建主题、论文图片、字体和研究作品不在公开范围，其权利不因本仓库改变。本机安装的 AI Skills 不随仓库分发。
 
 以下保留直接依赖的许可原文。
 
