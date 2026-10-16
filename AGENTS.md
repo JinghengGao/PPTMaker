@@ -2,8 +2,9 @@
 
 默认中文沟通，使用 Windows PowerShell、npm.cmd、npx.cmd。先读 README、相关源文件与 package.json，检查 Git 状态；使用锁定依赖，不重新初始化或顺带升级。
 
+- 制作、修改或验收本仓库演示时，先读 [.agents/skills/pptmaker/SKILL.md](.agents/skills/pptmaker/SKILL.md)；Slidev 语法和功能按需读官方 slidev Skill，需要讲稿时再读社区 presenter Skill。固定来源与适配见 [docs/SKILLS.md](docs/SKILLS.md)，任务提示词集中在 [docs/PROMPTS.md](docs/PROMPTS.md)。本项目使用现有入口，上游独立初始化、pnpm 和默认导出示例不能替代工作区流程。
 - 用户源稿、参考原件、主题、素材和各版成品保持完整；修改前检查现有变更，不覆盖其他 deck。参考原件只读，归档时复制。
-- 公开 Git 包含通用工具、说明、官方 demo、TemplateMC/TemplateNKU 主题，以及经审阅的素材和示例 PDF/PPTX。私人资料、本机 Skills、依赖、缓存及其他成品不提交或上传。
+- 公开 Git 包含通用工具、说明、经审阅的项目 Skills、官方 demo、TemplateMC/TemplateNKU 主题，以及经审阅的素材和示例 PDF/PPTX。私人资料、本机个人 Skills、依赖、缓存及其他成品不提交或上传。
 - demo 的 slides.md 与 Counter.vue 保持 Slidev v53.0.0 官方内容，不改写成自制示例。新作品用 New 创建独立 deck，直接编辑其 slides.md。
 - 初始仓库在 decks/ 下并列放置 demo、mc、nku，均可直接 Preview、Export、Check。这三个 ID 保留给内置示例，不设置单独的 templates/ 目录。
 - 根目录保留入口和文档；Slidev 依赖、decks/、shared/、config/ 和 scripts/ 集中在 workspace/，路径使用相对引用。

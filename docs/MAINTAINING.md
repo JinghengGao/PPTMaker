@@ -15,6 +15,8 @@ scripts/ 只保留四个运行所需文件，日常通过根入口调用，不�
 
 成品检查属于制作演示的通用能力；截图和报告在临时目录中生成，用完删除。开发者的回归测试脚本、固定本仓库文件及哈希的提交审查脚本不随工作区分发。
 
+项目 Skills 是说明层，保存在 .agents/skills/，实际执行仍复用上述四个脚本。官方版本、社区改编与客户端加载方式统一记录在 [SKILLS.md](SKILLS.md)；任务提示词只在 [PROMPTS.md](PROMPTS.md) 维护完整版本。仅白名单中的三套项目 Skills 纳入 Git，用户另行安装的 Skills 和全局配置不提交。
+
 根目录放入口和文档，workspace/ 放 Node 依赖、演示及运行工具。共用 config/vite.ts 指向 public/，禁止构建时复制整个私人素材目录；文件服务允许访问 workspace/，供主题示例读取 node_modules 内的公式字体。mc、nku 及 New 创建的 deck 通过各自 vite.config.ts 的一行导出复用配置，官方 demo 不需要额外配置。保留这层边界，所有内部引用均采用相对路径。
 
 demo、mc、nku 在 decks/ 下并列保存，Get-DeckDirectory 对所有作品统一解析 decks/<id>，导出检查直接采用目录名作为 ID。mc、nku 的 manifest.json、STYLE-GUIDE.md 与 slides.md 位于作品根目录，布局、配色和 NKU 校园素材位于各自 theme/；不保留额外示例层或顶层主题目录。
@@ -48,6 +50,8 @@ git diff --cached
 ```
 
 核查私人资料、身份信息、凭据、本机绝对路径及文档链接。官方 demo、内置主题源码及已审阅素材和示例成品纳入 Git；重新导出示例时逐页审阅，并同步 .gitignore 与 README 链接。原始参考 PDF 保持本地。
+
+修改 Skills 时校验 YAML frontmatter、引用路径和上游许可，区分原样引用与本地改编。用临时工作副本验证命令流程；只有真正运行过 Agent 的任务才能报告行为验证，不以文本结构检查代替。更新允许公开的 Skill 清单时同时调整 .gitignore，避免把本机其他 Skills 一并提交。
 
 正式发布前运行 `npm.cmd --prefix workspace audit --audit-level=high`，审阅完整依赖报告并解决影响发布的漏洞。不要自动执行 audit fix --force 或更换锁定版本；依赖调整后重新验证导出。项目许可证及模板、照片和校园素材的分发授权必须明确后，才能宣称完成开源授权。
 

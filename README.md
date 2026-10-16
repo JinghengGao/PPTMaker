@@ -26,6 +26,29 @@ cd ..
 
 官方 demo 的严格预览检查还会报告第 4 页装饰箭头越界、第 5 页代码块横向溢出。它用于展示官方功能，当前并未通过全部严格 QA；不会为通过检查而改写官方源稿。
 
+## 用 Agent 制作
+
+完成环境安装后，在仓库根目录打开具有文件读写、命令执行和本地浏览器能力的 Agent。仓库已配置项目 Skills，无需另外全局安装：
+
+| Skill | 分工 |
+| --- | --- |
+| [pptmaker](.agents/skills/pptmaker/SKILL.md) | 总体流程：读资料、写提纲、制作、修正、验收和版本化交付 |
+| [slidev](.agents/skills/slidev/SKILL.md) | 与 Slidev 53.0.0 对齐的官方语法和功能参考，按需读取 |
+| [slidev-presenter-mode](.agents/skills/slidev-presenter-mode/SKILL.md) | 社区讲稿与排练适配 |
+
+在支持项目 Skills 的 Codex 中可直接发送下面的任务，替换资料路径与主题：
+
+```text
+使用 $pptmaker，根据 [资料路径] 制作 [主题] 的演示。
+Deck ID：my-talk；样式：mc；约 10 分钟、8 页；输出版本：1.0.0。
+先核对资料并组织主线，再完成页面、逐页预览、修正及 PDF/可编辑 PPTX 导出检查。
+关键资料缺失时集中提问，不编造数据或引用；在已授权范围内持续完成，不停在计划。
+```
+
+其他 Agent 或未识别到 `$pptmaker` 时，把第一行改为：`先读 AGENTS.md、README.md 和 .agents/skills/pptmaker/SKILL.md，再根据 [资料路径] 制作 [主题] 的演示。` 新安装的 Skill 在下个会话可用，未显示时重新打开 Agent 会话。纯聊天窗口或没有浏览器权限的环境不能完成本地制作及视觉验收，应明确报告未执行项。
+
+完整的新建、改稿、参考学习、讲稿与续作提示词见 [PROMPTS.md](docs/PROMPTS.md)；来源、许可和客户端发现方式见 [SKILLS.md](docs/SKILLS.md)。Skills 是说明文件，实际操作继续使用下方同一套工具。
+
 ## 制作自己的演示
 
 ```powershell
@@ -80,7 +103,8 @@ New 会复制对应主题的示例与所需图片，主题仍引用来源示例�
 ```text
 PPTMaker.ps1                    日常入口：Doctor / New / Preview / Export / Check
 README.md / AGENTS.md           使用说明与 AI 工作约定
-docs/                          创作流程与维护说明
+.agents/skills/                PPTMaker 流程、官方 Slidev 参考、社区讲稿 Skill
+docs/                          任务提示词、创作流程、Skills 来源与维护说明
 workspace/
   package.json / package-lock.json
   config/vite.ts               共用素材路径、文件访问范围和构建规则
@@ -98,7 +122,7 @@ workspace/
 
 根目录提供使用入口和说明；workspace/ 集中管理 Slidev 依赖、演示与运行工具。在该目录执行 `npm.cmd ci`，即可安装锁定版本的 Slidev。config/vite.ts 供 mc、nku 和新建作品复用：统一 public/ 素材路径，允许读取工作区内的公式字体，并防止构建时复制整个私人素材目录。
 
-官方 demo、两套内置主题及其已审阅素材和示例成品纳入 Git；自己的 deck、素材（public/）、参考材料（根 references/）和其他成品默认忽略，按需创建。每套演示直接使用自己的 slides.md，工程根目录没有重复源稿。依赖通过 npm 安装，本机 Skills 不随仓库分发。
+官方 demo、两套内置主题及其已审阅素材和示例成品，以及三套项目 Skills 纳入 Git；自己的 deck、素材（public/）、参考材料（根 references/）和其他成品默认忽略，按需创建。每套演示直接使用自己的 slides.md，工程根目录没有重复源稿。依赖通过 npm 安装，本机个人 Skills 不随仓库分发。
 
 [创作流程与 AI 提示词](docs/WORKFLOW.md) · [维护与验证](docs/MAINTAINING.md)
 

@@ -3,6 +3,14 @@
 /Relevant Materials/
 **/node_modules/
 **/.agents/
+# Publish only the reviewed project skills; other local agent files stay ignored.
+!/.agents/
+/.agents/*
+!/.agents/skills/
+/.agents/skills/*
+!/.agents/skills/pptmaker/
+!/.agents/skills/slidev/
+!/.agents/skills/slidev-presenter-mode/
 **/.env
 **/.env.*
 **/*.local

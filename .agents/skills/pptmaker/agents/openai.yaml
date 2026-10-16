@@ -1,0 +1,4 @@
+interface:
+  display_name: "PPTMaker"
+  short_description: "Create and review decks in this workspace"
+  default_prompt: "Use $pptmaker to create a presentation from my materials and verify the PDF and editable PPTX."

@@ -16,7 +16,15 @@ demo 原样取自 Slidev v53.0.0：
 - [slides.md](https://github.com/slidevjs/slidev/blob/v53.0.0/packages/slidev/template.md)
 - [components/Counter.vue](https://github.com/slidevjs/slidev/blob/v53.0.0/packages/create-app/template/components/Counter.vue)
 
-以上文件遵循下方 Slidev MIT 许可。示例引用的外部图片、推文、字体和服务仍适用各自权利与使用条件。未纳入 Git 的私人参考、自建主题、论文图片、字体和研究作品不在公开范围，其权利不因本仓库改变。本机安装的 AI Skills 不随仓库分发。
+以上文件遵循下方 Slidev MIT 许可。示例引用的外部图片、推文、字体和服务仍适用各自权利与使用条件。未纳入 Git 的私人参考、自建主题、论文图片、字体和研究作品不在公开范围，其权利不因本仓库改变。本机个人 AI Skills 不随仓库分发，经审阅的三套项目 Skills 除外。
+
+## 项目 Skills
+
+- `.agents/skills/slidev/` 来自 [Slidev v53.0.0](https://github.com/slidevjs/slidev/tree/30a0a54c8739b4b395d9b336a6304cc8ebcc3947/skills/slidev)。SKILL.md 与 references 原样保留；MIT 许可原文随该目录分发，版权归 Anthony Fu。
+- `.agents/skills/slidev-presenter-mode/` 改编自 [Yoan Bernabeu 的社区 Skill](https://github.com/yoanbernabeu/slidev-skills/tree/db69c86909b5b18ceb5dad18ded20c8ef26d2929/skills/presentation/slidev-presenter-mode)。保留讲稿、排练与双屏思路，改写为 PPTMaker 本地流程，省略远程控制、录制和独立构建示例；MIT 原文与 Copyright (c) 2025 Yoan Bernabeu 声明随该目录保留。
+- `pptmaker` 和项目任务提示词由本仓库编写。上述第三方 MIT 许可不替代本项目尚未确定的整体许可证，也不授权 MC/NKU 的素材。
+
+固定来源、改编范围与维护方式见 [docs/SKILLS.md](docs/SKILLS.md)。
 
 以下保留直接依赖的许可原文。
 
