@@ -6,7 +6,7 @@ Windows 优先；不内置模型 API。本项目许可证尚未确定，第三�
 
 ## 快速开始
 
-需要 Windows PowerShell 5.1、Node.js ≥22.12（建议 24 LTS）、Python 3.10+ 和 Git。在仓库根目录运行：
+需要 Windows PowerShell 5.1、Node.js ≥22.12（建议 24 LTS）、Python 3.10+ 和 Git。PowerPoint 可选，仅用于 PPTX 原生检查；导出不要求安装 Office。在仓库根目录运行：
 
 ```powershell
 cd workspace
@@ -22,7 +22,9 @@ cd ..
 
 **demo 是 Slidev 53.0.0 的官方 Starter 原稿及 Counter 组件**，使用官方 Seriph 主题。在线图片、推文、字体及 PlantUML 示例需要网络，离线时可能无法完整显示。
 
-三套内置示例均附带源稿及 v1.0.0 的 PDF、可编辑 PPTX，克隆后即可直接打开或预览，无需先运行 New。官方 demo 的 PDF 第 2 页渐变标题在 Windows 渲染中异常，第 6 页在线推文未显示；官方随机封面也会使两格式背景不同。源码保持原样。
+三套内置示例均附带源稿及 v1.0.0 的 PDF、可编辑 PPTX。克隆后可直接打开成品；完成上述安装后即可预览，无需先运行 New。官方 demo 的 PDF 第 2 页渐变标题在 Windows 渲染中异常，第 6 页在线推文未显示；官方随机封面也会使两格式背景不同。源码保持原样。mc、nku 使用本地图片和字体配置，适合先体验中文演示流程。
+
+官方 demo 的严格预览检查还会报告第 4 页装饰箭头越界、第 5 页代码块横向溢出。它用于展示官方功能，当前并未通过全部严格 QA；不会为通过检查而改写官方源稿。
 
 ## 制作自己的演示
 
@@ -33,7 +35,7 @@ cd ..
 .\PPTMaker.ps1 -Action Check -DeckId my-talk -Version 1.0.0
 ```
 
-New 从官方示例创建独立副本，默认使用 default 主题；支持 `-Theme mc`、`-Theme nku` 或其他包含 theme/ 的示例 ID，同名目录不会覆盖。编辑该 deck 的 slides.md，任务与检查结论填写在 brief.md、QA.md；自己的素材放入 public/decks/my-talk/，使用 `/decks/my-talk/文件名` 引用。
+New 默认从官方示例创建独立副本，使用 default 主题；支持 `-Theme mc`、`-Theme nku` 或其他包含 theme/ 的示例 ID，同名目录不会覆盖。编辑 `workspace/decks/my-talk/slides.md`，任务与检查结论填写在同目录的 brief.md、QA.md；自己的素材放入 `workspace/public/decks/my-talk/`，使用 `/decks/my-talk/文件名` 引用。
 
 Deck ID 使用小写字母、数字及连字符；版本使用 X.Y.Z。成品位于 `workspace/decks/my-talk/exports/v1.0.0/`。同版本重导成功后替换，失败保留旧成品，其他版本不动。临时截图和报告结束后删除。
 
@@ -71,7 +73,7 @@ demo、mc、nku 并列保存在 decks/，每套的源稿、素材和成品都在
 .\PPTMaker.ps1 -Action New -DeckId nku-talk -Theme nku
 ```
 
-New 会复制对应主题的示例与所需图片。普通页面用 `heading` 设置顶部标题；目录用 `agenda` 数组和 `active` 设置当前条目。NKU 支持 `agendaStyle: tiles` 或 `list`。MC、NKU 的配色、布局和品牌素材保存在各自 theme/ 内，共同页面骨架在 shared/。上游来源与素材权利见第三方声明。
+New 会复制对应主题的示例与所需图片，主题仍引用来源示例的 theme/。普通页面用 `heading` 设置顶部标题；目录用 `agenda` 数组和 `active` 设置当前条目。NKU 支持 `agendaStyle: tiles` 或 `list`。MC、NKU 的配色、布局和品牌素材保存在各自 theme/ 内，共同页面骨架在 shared/；迁移作品时保留这些依赖目录。上游来源与素材权利见第三方声明。
 
 ## 仓库结构
 
@@ -105,4 +107,4 @@ workspace/
 - **脚本执行策略阻止运行**：确认代码可信后，使用 `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\PPTMaker.ps1` 加相应参数。
 - **修改 SVG 后未更新**：停止并重新启动 Preview。
 - **异常中断留下 .export.lock 或 .export-work**：确认导出已停止；若工作目录中有 previous，先恢复旧成品，再清理。
-- **浏览器 QA 报 FloatingVue / Popper 错误**：锁定工具链的已知兼容问题，默认检查失败。确认接受该问题时显式加 `-AllowKnownToolchainIssues`，不会放行其他错误。
+- **浏览器 QA 报 FloatingVue / Popper 错误**：上游 Twoslash 与 FloatingVue 的兼容问题，影响拖动选择代码时的提示框增强。依赖捕获错误后继续运行，浏览器 QA 默认仍判失败。确认接受该问题时显式加 `-AllowKnownToolchainIssues`，只允许这条已知错误，不表示问题已修复。

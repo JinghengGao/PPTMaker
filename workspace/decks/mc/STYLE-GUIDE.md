@@ -42,7 +42,7 @@ PDF 中字体包括 Liberation Sans、Noto Sans CJK JP、TeX Gyre Termes Math。
 | center | 居中 Q&A 或简短结论；heading 可选 |
 | end | 全屏主色，正文使用一级标题 |
 
-全局第一页可设置 footerLeft、footerTitle；各页可单独覆盖。showTotal: true 显示总页数。局部素材建议放在自己的 public/decks/<id>/；引用 /decks/<id>/文件名。
+全局第一页可设置 footerLeft、footerTitle；各页可单独覆盖。showTotal: true 显示总页数。局部素材建议放在仓库内的 workspace/public/decks/<id>/；引用 /decks/<id>/文件名。
 
 ~~~yaml
 ---

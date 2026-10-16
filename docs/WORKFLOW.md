@@ -5,7 +5,7 @@
 ## 新演示
 
 1. 用根入口 New 创建独立 deck，填写 brief.md 的受众、目标、主题、资料来源和版本。
-2. 将官方 Starter 内容替换为自己的材料；图片放入对应 public/decks/<id>/，标清来源。
+2. 将新建 deck 的示例内容替换为自己的材料；图片放入 workspace/public/decks/<id>/，以 /decks/<id>/文件名 引用，标清来源。
 3. Preview 逐页核查。每页一个观点，内容过多时重排或拆页；不得编造论文、数据和引用。
 4. Export 导出明确版本，Check 检查成品，人工打开 PDF/PPTX 逐页复核。QA.md 记录当前结论和未验证项。
 

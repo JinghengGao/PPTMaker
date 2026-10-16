@@ -51,6 +51,8 @@ git diff --cached
 
 正式发布前运行 `npm.cmd --prefix workspace audit --audit-level=high`，审阅完整依赖报告并解决影响发布的漏洞。不要自动执行 audit fix --force 或更换锁定版本；依赖调整后重新验证导出。项目许可证及模板、照片和校园素材的分发授权必须明确后，才能宣称完成开源授权。
 
+安装和导出成功只证明流程可运行，发布时还需单独审阅依赖风险、授权与成品质量。浏览器检查使用 AllowKnownToolchainIssues 时只能报告有条件通过。原版 demo 第 4 页的装饰箭头越界、第 5 页的代码块横向溢出仍会被严格检查判失败；保留真实结果及官方源码，不放宽公共检查来隐藏它们。
+
 依赖版本固定，不顺带升级。用户 deck、资料和其他成品默认忽略；Git 忽略不是备份，重要材料需自行保存。
 
 共享代码修改后验证 New、Preview、Export、Check；演示内容变动须逐页观察。测试与渲染使用临时目录，不提交截图、报告、依赖和机器配置。官方 demo 的来源在根第三方声明中，其 slides.md 应与安装包 @slidev/cli/template.md 内容一致，Counter.vue 来自同一版本的官方脚手架。
