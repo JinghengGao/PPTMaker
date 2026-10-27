@@ -49,6 +49,8 @@ Deck ID：my-talk；样式：mc；约 10 分钟、8 页；输出版本：1.0.0�
 
 完整的新建、改稿、参考学习、讲稿与续作提示词见 [PROMPTS.md](docs/PROMPTS.md)；来源、许可和客户端发现方式见 [SKILLS.md](docs/SKILLS.md)。Skills 是说明文件，实际操作继续使用下方同一套工具。
 
+pptmaker 内含按需读取的内容组织、视觉表达、数据可视化和设计复核参考，优先服务科研汇报，也可用于其他演示。它们帮助 Agent 做设计判断，继续使用所选主题和现有 Slidev 生成导出流程；不需要另装 PPT Master。设计研究来源与本地自主编写范围见 [SKILLS.md](docs/SKILLS.md#设计研究参考)。
+
 ## 制作自己的演示
 
 ```powershell

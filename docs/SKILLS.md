@@ -40,6 +40,19 @@
 
 官方 Skill 与当前锁定的 @slidev/cli 53.0.0 对齐。[Slidev 官方 AI 指南](https://sli.dev/guide/work-with-ai)也提供了通用安装方式；本仓库已包含固定副本，首次使用不必再从网络安装 Skills，更不要用 latest 覆盖它们。
 
+## 设计研究参考
+
+pptmaker 的四份设计指南由本仓库围绕 Markdown/Vue、已有主题及制作验收流程独立组织和编写。研究时参考了 [PPT Master 固定提交 cafb4ccff9b0cce655aad922d9c7a84577f02c84](https://github.com/hugohe3/ppt-master/tree/cafb4ccff9b0cce655aad922d9c7a84577f02c84) 中的方法讨论，未复制或翻译其文件、代码、图表、图标或其他素材。下表记录方法研究的对应范围，不表示文件改编关系或运行依赖。
+
+| 本地参考 | 研究过的上游内容 | 本地用途 |
+| --- | --- | --- |
+| [presentation-design](../.agents/skills/pptmaker/references/presentation-design.md) | templates/styles/academic-research/templates/design_spec.md 的汇报、页面任务与证据讨论 | 用现有 brief 组织听众问题、观点与依据，不套固定章节 |
+| [visual-expression](../.agents/skills/pptmaker/references/visual-expression.md) | references/executor-structure.md、references/image-layout-spec.md 的关系与图文安排讨论 | 在所选主题中表达真实结构、安排标签与图文，核查实际渲染 |
+| [data-visualization](../.agents/skills/pptmaker/references/data-visualization.md) | references/executor-chart.md 及学术规范中的比较条件和数据表达讨论 | 按问题选择图表或表格，核对数值、尺度、单位与条件 |
+| [design-review](../.agents/skills/pptmaker/references/design-review.md) | references/visual-review.md 及学术规范中的视觉复核讨论 | 补充本地技术验收，分别记录设计观察、修正与成品差异 |
+
+本地指南没有引入上游的 SVG 编译合同、原生对象接口、角色调度、确认节点、质量报告格式或导出工具。参考方法不改变本项目许可证；已有第三方内容的署名和许可继续按原记录保留。未来若实际复用具体文字、代码或素材，按实际使用内容另行记录来源与许可，不能仅改写名称就归为自主编写。
+
 ## Agent 如何使用
 
 在仓库根目录或其子目录启动支持项目 Skills 的 Codex，项目中的 .agents/skills/ 可被发现；可使用 `$pptmaker` 明确选择主流程。[OpenAI 官方说明](https://learn.chatgpt.com/docs/build-skills)介绍了目录发现与按需加载：先根据 name、description 和路径选择 Skill，再读取完整 SKILL.md，按需读取参考。参考文件不会因放入目录就自动应用，主 Skill 必须链接它并说明使用条件。

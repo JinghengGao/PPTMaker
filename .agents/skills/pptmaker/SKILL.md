@@ -11,6 +11,17 @@ description: "Create, revise, review and export presentations inside a PPTMaker 
 
 ## 选择当前任务需要的知识
 
+本轮任务需要哪项判断，就读取对应参考；同一任务中已读且未变的内容无需反复加载。
+
+| 当前工作 | 设计参考 |
+| --- | --- |
+| 新建、组织提纲或重构主线 | [presentation-design](references/presentation-design.md)：受众、页面任务与观点依据 |
+| 制作页面或修改视觉表达 | [visual-expression](references/visual-expression.md)：关系图、图文与阅读层级 |
+| 涉及数据图表或比较表 | [data-visualization](references/data-visualization.md)：比较条件、数值和表达选择 |
+| 逐页视觉复核 | [design-review](references/design-review.md)：核对页面任务、关系、证据与可读性 |
+
+只做提纲时不进入页面制作；仅写讲稿、改普通文字或导出时，不因此重新规划或重排视觉。设计参考提供判断方法，主题和用户指定内容仍是约束。
+
 - 制作或修改内容时，按需读取 [Slidev 官方 Skill](../slidev/SKILL.md) 中对应的 references，不一次加载全部参考文件。
 - MC/NKU 的布局参数以所选示例 STYLE-GUIDE.md 和 theme/layouts/ 为准，普通页用 heading；不要直接套用其他主题的所有布局。
 - 需要讲稿或排练时，读取 [slidev-presenter-mode](../slidev-presenter-mode/SKILL.md)。
@@ -27,7 +38,7 @@ description: "Create, revise, review and export presentations inside a PPTMaker 
 
 ## 先组织信息，再设计页面
 
-在 brief.md 中简要记录目标、关键结论、资料出处、逐页提纲和待确认项。每页提纲包含标题、要传达的观点、依据以及适合的表达形式；按任务选择问题—方法—证据—局限—结论等结构，不强制固定章节。
+在 brief.md 中简要记录目标、关键结论、资料出处、逐页提纲和待确认项。每页说明页面任务、核心观点、依据、必要的信息关系和表达安排；数据页按需附指标、单位与比较条件。沿用原有简洁格式，不新增第二套大纲或设计锁。具体组织方法按上表读取，不强制固定章节。
 
 提供简短方向说明后，在已授权范围内继续完成制作与验证，不把每一步都变成等待批准的节点。重大事实缺口、相互矛盾的资料或用户明确要求确认的大纲，先澄清再做依赖这些信息的内容。
 
@@ -63,6 +74,6 @@ Preview 是前台服务，先在独立会话启动，等待实际页面就绪，
 
 已知 FloatingVue 错误默认仍判失败；只有用户明确接受时才使用 -AllowKnownToolchainIssues，标记有条件通过。缺少 PowerPoint 时区分结构检查与未执行的原生渲染。自动检查通过不代替人工或视觉复核。
 
-QA.md 简要记录版本、实际命令、检查结果、已知问题、可编辑范围和未验证项。遇到依赖缺失、锁冲突或导出失败，保留旧成品并说明具体阻塞；不自行绕过锁或宣称交付完成。只结束本次启动的进程，不关闭用户已有服务。
+QA.md 简要记录版本、实际命令、检查结果、已知问题、可编辑范围和未验证项；技术检查、设计观察与实际修正分开说明。遇到依赖缺失、锁冲突或导出失败，保留旧成品并说明具体阻塞；不自行绕过锁或宣称交付完成。只结束本次启动的进程，不关闭用户已有服务。
 
 最终给出源稿位置、版本化 PDF/PPTX 位置和影响使用的限制。每版仅保留 PDF 与可编辑 PPTX，清理本次临时截图与测试副本。公开发布另行执行仓库审阅，不自动提交用户材料或推送。
