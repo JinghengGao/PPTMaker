@@ -51,7 +51,7 @@ git diff --cached
 
 核查私人资料、身份信息、凭据、本机绝对路径及文档链接。官方 demo、内置主题源码及已审阅素材和示例成品纳入 Git；重新导出示例时逐页审阅，并同步 .gitignore 与 README 链接。原始参考 PDF 保持本地。
 
-修改 Skills 时校验 YAML frontmatter、引用路径和上游许可，区分原样引用与本地改编。用临时工作副本验证命令流程；只有真正运行过 Agent 的任务才能报告行为验证，不以文本结构检查代替。更新允许公开的 Skill 清单时同时调整 .gitignore，避免把本机其他 Skills 一并提交。
+Skills 的规则归属、来源更新和分层验证统一按 [SKILLS.md](SKILLS.md#维护) 执行。区分原样引用与本地改编，只报告实际完成的文件检查与任务验证；新增独立 Skill 时同步审阅公开白名单，避免把本机其他 Skills 一并提交。
 
 正式发布前运行 `npm.cmd --prefix workspace audit --audit-level=high`，审阅完整依赖报告并解决影响发布的漏洞。不要自动执行 audit fix --force 或更换锁定版本；依赖调整后重新验证导出。项目许可证及模板、照片和校园素材的分发授权必须明确后，才能宣称完成开源授权。
 

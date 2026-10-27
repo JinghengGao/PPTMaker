@@ -45,7 +45,7 @@ Deck ID：my-talk；样式：mc；约 10 分钟、8 页；输出版本：1.0.0�
 关键资料缺失时集中提问，不编造数据或引用；在已授权范围内持续完成，不停在计划。
 ```
 
-其他 Agent 或未识别到 `$pptmaker` 时，把第一行改为：`先读 AGENTS.md、README.md 和 .agents/skills/pptmaker/SKILL.md，再根据 [资料路径] 制作 [主题] 的演示。` 新安装的 Skill 在下个会话可用，未显示时重新打开 Agent 会话。纯聊天窗口或没有浏览器权限的环境不能完成本地制作及视觉验收，应明确报告未执行项。
+其他 Agent 或未识别到 `$pptmaker` 时，把第一行改为：`先读 AGENTS.md、README.md 和 .agents/skills/pptmaker/SKILL.md，再根据 [资料路径] 制作 [主题] 的演示。` Codex 会自动检测 Skill 变化，未显示更新时再重启；当前对话已经读过的文件修改后应重新读取。其他客户端以其实际支持为准，详见 [Skills 使用说明](docs/SKILLS.md#agent-如何使用)。纯聊天窗口或没有浏览器权限的环境不能完成本地制作及视觉验收，应明确报告未执行项。
 
 完整的新建、改稿、参考学习、讲稿与续作提示词见 [PROMPTS.md](docs/PROMPTS.md)；来源、许可和客户端发现方式见 [SKILLS.md](docs/SKILLS.md)。Skills 是说明文件，实际操作继续使用下方同一套工具。
 

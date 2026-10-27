@@ -5,7 +5,9 @@ description: "Create, revise, review and export presentations inside a PPTMaker 
 
 # PPTMaker：由资料到可交付演示
 
-在仓库根目录操作。先读 [AGENTS.md](../../../AGENTS.md)、[README.md](../../../README.md) 和当前 Git 状态；这里的路径均相对仓库根目录。详细任务提示词见 [docs/PROMPTS.md](../../../docs/PROMPTS.md)。
+在仓库根目录操作。先读 [AGENTS.md](../../../AGENTS.md)、[README.md](../../../README.md) 和当前 Git 状态。命令与 workspace/ 等操作路径以仓库根目录为基准；Markdown 链接相对所在文件解析。详细任务提示词见 [docs/PROMPTS.md](../../../docs/PROMPTS.md)。
+
+用户当前请求决定任务范围；本 Skill 负责本仓库的制作、启动、导出和验收流程，专项参考按下列条件读取。已选主题的布局与品牌规则来自其 STYLE-GUIDE.md 和 theme/，通用设计建议在这些约束内使用。参考中的独立初始化、安装或导出示例不能替代本仓库入口；分工与来源统一记录在 [docs/SKILLS.md](../../../docs/SKILLS.md)。
 
 ## 选择当前任务需要的知识
 
